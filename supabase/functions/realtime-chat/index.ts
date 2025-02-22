@@ -8,6 +8,8 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log("Received request:", req.method);
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -21,12 +23,15 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Upgrading to WebSocket connection");
     const { socket, response } = Deno.upgradeWebSocket(req);
     
     // Connect to OpenAI's Realtime API
+    console.log("Connecting to OpenAI Realtime API");
     const openAISocket = new WebSocket("wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01");
 
     openAISocket.onopen = () => {
+      console.log("Connected to OpenAI");
       // Send initial configuration after connection is established
       const config = {
         "type": "session.update",
@@ -48,21 +53,27 @@ serve(async (req) => {
         }
       };
       openAISocket.send(JSON.stringify(config));
+      console.log("Sent initial configuration to OpenAI");
     };
 
     // Forward messages from client to OpenAI
     socket.onmessage = (event) => {
+      console.log("Forwarding message to OpenAI:", event.data);
       openAISocket.send(event.data);
     };
 
     // Forward messages from OpenAI to client
     openAISocket.onmessage = (event) => {
+      console.log("Received message from OpenAI:", event.data);
       socket.send(event.data);
     };
 
     // Handle errors
     socket.onerror = (e) => console.error("WebSocket error:", e);
     openAISocket.onerror = (e) => console.error("OpenAI WebSocket error:", e);
+
+    socket.onclose = () => console.log("Client WebSocket closed");
+    openAISocket.onclose = () => console.log("OpenAI WebSocket closed");
 
     return response;
   } catch (error) {
