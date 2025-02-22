@@ -90,8 +90,10 @@ const Dashboard = () => {
                       <Button
                         key={category}
                         variant={selectedCategory === category ? "secondary" : "ghost"}
-                        className={`w-full justify-start text-left ${
-                          selectedCategory === category ? "bg-secondary" : ""
+                        className={`w-full justify-start text-left font-medium ${
+                          selectedCategory === category 
+                            ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                            : "hover:bg-secondary"
                         }`}
                         onClick={() => setSelectedCategory(category)}
                       >
