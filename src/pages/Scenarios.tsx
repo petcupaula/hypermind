@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -21,7 +20,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Fetch scenarios and personas from Supabase
   const { data: scenarios = [], isLoading } = useQuery({
     queryKey: ['scenarios'],
     queryFn: async () => {
@@ -56,7 +54,6 @@ const Dashboard = () => {
         return [];
       }
 
-      // Transform the data to match the Scenario type
       return scenariosData.map(scenario => ({
         id: scenario.id,
         scenario_id: scenario.scenario_id,
@@ -78,7 +75,12 @@ const Dashboard = () => {
     }
   });
 
-  const categories = Array.from(new Set(scenarios.map(s => s.category)));
+  const categories = Array.from(new Set(scenarios.map(s => s.category)))
+    .sort((a, b) => {
+      if (a === "Cold Calling") return -1;
+      if (b === "Cold Calling") return 1;
+      return a.localeCompare(b);
+    });
 
   useEffect(() => {
     if (categories.length > 0 && !selectedCategory) {
