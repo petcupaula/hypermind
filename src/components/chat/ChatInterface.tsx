@@ -15,7 +15,7 @@ const ChatInterface = () => {
 
   // Initialize ElevenLabs conversation
   const conversation = useConversation({
-    api_key: import.meta.env.VITE_ELEVENLABS_API_KEY, // Using Vite's env variable syntax
+    api_key: import.meta.env.VITE_ELEVENLABS_API_KEY,
     onConnect: () => {
       console.log("Connected to ElevenLabs - Setting up session...");
       setIsConnected(true);
@@ -57,13 +57,13 @@ const ChatInterface = () => {
       agent: {
         prompt: {
           prompt: "You are an Enterprise CTO Persona, a tech-savvy decision maker at a Fortune 500 company. Help users understand our product offerings and make informed decisions.",
+          language: "en",
         },
         firstMessage: "Hello! I'm your Enterprise CTO advisor. How can I assist you with your technology decisions today?",
-        language: "en",
       },
       tts: {
         model_id: "eleven_multilingual_v2",
-        voiceId: "pqHfZKP75CvOlQylNhV4",
+        voice_id: "pqHfZKP75CvOlQylNhV4", // Changed from voiceId to voice_id
       },
     },
   });
@@ -73,7 +73,13 @@ const ChatInterface = () => {
       console.log("Starting conversation - Requesting microphone access...");
       
       // Request microphone access before starting
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
       console.log("Microphone access granted", stream.active);
       
       // Start the conversation with your agent ID
