@@ -6,15 +6,23 @@ import Navigation from "@/components/layout/Navigation";
 import ChatInterface from "@/components/chat/ChatInterface";
 import ScenarioCard, { Scenario } from "@/components/scenarios/ScenarioCard";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { scenarios } from "@/data/scenarios";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Dashboard = () => {
   const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [session, setSession] = useState<any>(null);
   const navigate = useNavigate();
   const categories = Array.from(new Set(scenarios.map(s => s.category)));
+
+  // Set initial category
+  useEffect(() => {
+    if (categories.length > 0 && !selectedCategory) {
+      setSelectedCategory(categories[0]);
+    }
+  }, [categories]);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -63,7 +71,7 @@ const Dashboard = () => {
             <ChatInterface />
           </div>
         ) : (
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h1 className="text-4xl font-bold tracking-tight mb-4">
                 Sales Training Scenarios
@@ -73,29 +81,44 @@ const Dashboard = () => {
               </p>
             </div>
 
-            <Tabs defaultValue={categories[0]} className="space-y-8">
-              <TabsList className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {categories.map((category) => (
-                  <TabsTrigger key={category} value={category} className="w-full">
-                    {category}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-
-              {categories.map((category) => (
-                <TabsContent key={category} value={category} className="space-y-4">
-                  {scenarios
-                    .filter((scenario) => scenario.category === category)
-                    .map((scenario) => (
-                      <ScenarioCard
-                        key={scenario.id}
-                        scenario={scenario}
-                        onStart={setSelectedScenario}
-                      />
+            <div className="grid grid-cols-12 gap-8">
+              {/* Left Panel - Categories */}
+              <div className="col-span-3 bg-card rounded-lg border shadow-sm">
+                <ScrollArea className="h-[600px]">
+                  <div className="p-4 space-y-2">
+                    {categories.map((category) => (
+                      <Button
+                        key={category}
+                        variant={selectedCategory === category ? "secondary" : "ghost"}
+                        className={`w-full justify-start text-left ${
+                          selectedCategory === category ? "bg-secondary" : ""
+                        }`}
+                        onClick={() => setSelectedCategory(category)}
+                      >
+                        {category}
+                      </Button>
                     ))}
-                </TabsContent>
-              ))}
-            </Tabs>
+                  </div>
+                </ScrollArea>
+              </div>
+
+              {/* Right Panel - Scenarios */}
+              <div className="col-span-9">
+                <ScrollArea className="h-[600px]">
+                  <div className="space-y-4 pr-4">
+                    {scenarios
+                      .filter((scenario) => scenario.category === selectedCategory)
+                      .map((scenario) => (
+                        <ScenarioCard
+                          key={scenario.id}
+                          scenario={scenario}
+                          onStart={setSelectedScenario}
+                        />
+                      ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
           </div>
         )}
       </main>
