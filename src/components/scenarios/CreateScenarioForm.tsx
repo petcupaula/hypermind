@@ -1,23 +1,35 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 
 const DIFFICULTY_OPTIONS = ["Beginner", "Intermediate", "Advanced"] as const;
+const DEFAULT_CATEGORIES = [
+  "Cold Calling",
+  "Discovery Calls",
+  "Product Demos",
+  "Negotiation",
+  "Objection Handling",
+  "Follow-up Calls",
+  "Closing Deals",
+] as const;
 
 const CreateScenarioForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [customCategory, setCustomCategory] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    category: "",
+    category: DEFAULT_CATEGORIES[0],
     difficulty: "Beginner" as typeof DIFFICULTY_OPTIONS[number],
     persona: {
       name: "",
@@ -25,16 +37,42 @@ const CreateScenarioForm = () => {
       company: "",
       prompt: "",
       firstMessage: "",
-      voiceId: "21m00Tcm4TlvDq8ikWAM", // Default voice ID
+      voiceId: "21m00Tcm4TlvDq8ikWAM",
+      appearance: "",
+      background: "",
+      personality: "",
     },
+  });
+
+  // Fetch existing categories from scenarios table
+  const { data: existingCategories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('scenarios')
+        .select('category')
+        .distinct();
+      
+      if (error) {
+        console.error('Error fetching categories:', error);
+        return DEFAULT_CATEGORIES;
+      }
+      
+      const categories = new Set([
+        ...DEFAULT_CATEGORIES,
+        ...data.map(d => d.category)
+      ]);
+      return Array.from(categories);
+    }
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
+    const finalCategory = customCategory || formData.category;
+
     try {
-      // First, create the persona
       const { data: personaData, error: personaError } = await supabase
         .from("personas")
         .insert({
@@ -44,22 +82,21 @@ const CreateScenarioForm = () => {
           prompt: formData.persona.prompt,
           first_message: formData.persona.firstMessage,
           voice_id: formData.persona.voiceId,
-          appearance: "Professional and approachable",
-          background: "Experienced in their field",
-          personality: "Friendly and knowledgeable",
+          appearance: formData.persona.appearance,
+          background: formData.persona.background,
+          personality: formData.persona.personality,
         })
         .select()
         .single();
 
       if (personaError) throw personaError;
 
-      // Then create the scenario
       const { error: scenarioError } = await supabase
         .from("scenarios")
         .insert({
           title: formData.title,
           description: formData.description,
-          category: formData.category,
+          category: finalCategory,
           difficulty: formData.difficulty,
           persona_id: personaData.id,
           scenario_id: crypto.randomUUID(),
@@ -103,7 +140,7 @@ const CreateScenarioForm = () => {
 
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
-            <Input
+            <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
@@ -113,12 +150,34 @@ const CreateScenarioForm = () => {
 
           <div className="space-y-2">
             <Label htmlFor="category">Category</Label>
-            <Input
-              id="category"
-              value={formData.category}
-              onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-              required
-            />
+            <div className="flex gap-2">
+              <select
+                id="category"
+                className="flex-1 rounded-md border border-input bg-background px-3 py-2"
+                value={formData.category}
+                onChange={(e) => {
+                  setFormData(prev => ({ ...prev, category: e.target.value }));
+                  setCustomCategory("");
+                }}
+              >
+                {existingCategories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+              <Input
+                placeholder="Or enter custom category"
+                value={customCategory}
+                onChange={(e) => {
+                  setCustomCategory(e.target.value);
+                  if (e.target.value) {
+                    setFormData(prev => ({ ...prev, category: "" }));
+                  }
+                }}
+                className="flex-1"
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -182,7 +241,7 @@ const CreateScenarioForm = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="personaPrompt">AI Prompt</Label>
-                <Input
+                <Textarea
                   id="personaPrompt"
                   value={formData.persona.prompt}
                   onChange={(e) => setFormData(prev => ({ 
@@ -202,6 +261,48 @@ const CreateScenarioForm = () => {
                     ...prev, 
                     persona: { ...prev.persona, firstMessage: e.target.value }
                   }))}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="personaAppearance">Appearance</Label>
+                <Input
+                  id="personaAppearance"
+                  value={formData.persona.appearance}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    persona: { ...prev.persona, appearance: e.target.value }
+                  }))}
+                  placeholder="Professional and approachable"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="personaBackground">Background</Label>
+                <Textarea
+                  id="personaBackground"
+                  value={formData.persona.background}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    persona: { ...prev.persona, background: e.target.value }
+                  }))}
+                  placeholder="Experienced in their field"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="personaPersonality">Personality</Label>
+                <Input
+                  id="personaPersonality"
+                  value={formData.persona.personality}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    persona: { ...prev.persona, personality: e.target.value }
+                  }))}
+                  placeholder="Friendly and knowledgeable"
                   required
                 />
               </div>
