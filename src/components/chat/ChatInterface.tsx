@@ -4,8 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Mic, Bot } from "lucide-react";
 import { useConversation } from "@11labs/react";
 import { useToast } from "@/components/ui/use-toast";
+import { Scenario } from "@/components/scenarios/ScenarioCard";
 
-const ChatInterface = () => {
+interface ChatInterfaceProps {
+  scenario: Scenario;
+}
+
+const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const { toast } = useToast();
@@ -54,12 +59,12 @@ const ChatInterface = () => {
     overrides: {
       agent: {
         prompt: {
-          prompt: "You are an Enterprise CTO Persona, a tech-savvy decision maker at a Fortune 500 company. Help users understand our product offerings and make informed decisions.",
+          prompt: scenario.persona.prompt,
         },
-        firstMessage: "Hello! I'm your Enterprise CTO advisor. How can I assist you with your technology decisions today?",
+        firstMessage: scenario.persona.firstMessage,
       },
       tts: {
-        voiceId: "pqHfZKP75CvOlQylNhV4", // Bill's voice
+        voiceId: scenario.persona.voiceId,
       },
     },
   });
@@ -106,12 +111,11 @@ const ChatInterface = () => {
     if (conversationRef.current) {
       conversationRef.current.endSession();
       conversationRef.current = null;
-      setIsConnected(false); // Immediately update the connection status
+      setIsConnected(false);
     }
   };
 
   useEffect(() => {
-    // Cleanup function
     return () => {
       console.log("Component unmounting, cleaning up conversation...");
       if (conversationRef.current) {
@@ -129,8 +133,8 @@ const ChatInterface = () => {
               <Bot className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-medium">Enterprise CTO Persona</h3>
-              <p className="text-sm text-gray-500">Tech-savvy decision maker at a Fortune 500 company</p>
+              <h3 className="font-medium">{scenario.title}</h3>
+              <p className="text-sm text-gray-500">{scenario.description}</p>
             </div>
           </div>
         </div>

@@ -68,7 +68,7 @@ const Dashboard = () => {
             >
               ← Back to scenarios
             </Button>
-            <ChatInterface />
+            <ChatInterface scenario={selectedScenario} />
           </div>
         ) : (
           <div className="max-w-6xl mx-auto">
