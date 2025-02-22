@@ -8,10 +8,12 @@ import ChatInterface from "@/components/chat/ChatInterface";
 import ScenarioCard, { Scenario } from "@/components/scenarios/ScenarioCard";
 import CreateScenarioForm from "@/components/scenarios/CreateScenarioForm";
 import GenerateAvatars from "@/components/scenarios/GenerateAvatars";
+import CallHistory from "@/components/scenarios/CallHistory";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Dashboard = () => {
   const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
@@ -161,40 +163,53 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-12 gap-8">
-              <div className="col-span-3 bg-card rounded-lg border shadow-sm min-h-[calc(100vh-320px)]">
-                <div className="p-4 space-y-2">
-                  {categories.map((category) => (
-                    <Button
-                      key={category}
-                      variant={selectedCategory === category ? "secondary" : "ghost"}
-                      className={`w-full justify-start text-left font-medium px-3 py-2 h-auto whitespace-normal ${
-                        selectedCategory === category 
-                          ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-                          : "hover:bg-secondary"
-                      }`}
-                      onClick={() => setSelectedCategory(category)}
-                    >
-                      <span className="line-clamp-2">{category}</span>
-                    </Button>
-                  ))}
-                </div>
-              </div>
+            <Tabs defaultValue="scenarios" className="space-y-8">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="scenarios">Scenarios</TabsTrigger>
+                <TabsTrigger value="history">Call History</TabsTrigger>
+              </TabsList>
 
-              <div className="col-span-9">
-                <div className="space-y-4">
-                  {scenarios
-                    .filter((scenario) => scenario.category === selectedCategory)
-                    .map((scenario) => (
-                      <ScenarioCard
-                        key={scenario.id}
-                        scenario={scenario}
-                        onStart={setSelectedScenario}
-                      />
-                    ))}
+              <TabsContent value="scenarios" className="space-y-4">
+                <div className="grid grid-cols-12 gap-8">
+                  <div className="col-span-3 bg-card rounded-lg border shadow-sm min-h-[calc(100vh-320px)]">
+                    <div className="p-4 space-y-2">
+                      {categories.map((category) => (
+                        <Button
+                          key={category}
+                          variant={selectedCategory === category ? "secondary" : "ghost"}
+                          className={`w-full justify-start text-left font-medium px-3 py-2 h-auto whitespace-normal ${
+                            selectedCategory === category 
+                              ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                              : "hover:bg-secondary"
+                          }`}
+                          onClick={() => setSelectedCategory(category)}
+                        >
+                          <span className="line-clamp-2">{category}</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="col-span-9">
+                    <div className="space-y-4">
+                      {scenarios
+                        .filter((scenario) => scenario.category === selectedCategory)
+                        .map((scenario) => (
+                          <ScenarioCard
+                            key={scenario.id}
+                            scenario={scenario}
+                            onStart={setSelectedScenario}
+                          />
+                        ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </TabsContent>
+
+              <TabsContent value="history">
+                <CallHistory />
+              </TabsContent>
+            </Tabs>
           </div>
         )}
       </main>
