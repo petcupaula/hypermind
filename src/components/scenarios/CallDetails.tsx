@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, ArrowLeft, RefreshCcw, Calendar, Clock, CheckCircle2, XCircle, Pause } from "lucide-react";
+import { Play, ArrowLeft, RefreshCcw, Calendar, Clock, CheckCircle2, XCircle, Pause, HelpCircle } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -337,7 +337,9 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
         <div key={key} className="bg-muted/50 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 mt-1">
-              {result.value !== null && (
+              {result.value === null ? (
+                <HelpCircle className="h-5 w-5 text-gray-400" />
+              ) : (
                 status.isGood ? (
                   <CheckCircle2 className="h-5 w-5 text-green-500" />
                 ) : (
