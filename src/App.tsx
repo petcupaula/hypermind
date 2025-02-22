@@ -10,6 +10,7 @@ import Scenarios from "@/pages/Scenarios";
 import NotFound from "@/pages/NotFound";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import CallDetailsPage from "@/pages/CallDetails";
+import CallHistoryPage from "@/pages/CallHistory";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,6 +47,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <Scenarios />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/history",
+    element: (
+      <ProtectedRoute>
+        <CallHistoryPage />
       </ProtectedRoute>
     ),
   },

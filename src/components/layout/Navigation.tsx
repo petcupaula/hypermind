@@ -52,26 +52,30 @@ const Navigation = () => {
             hypermind
           </Link>
           <div className="hidden md:flex items-center space-x-6 ml-8">
-            <Link to="/features" className="text-sm text-gray-600 hover:text-gray-900">Features</Link>
-            <Link to="/pricing" className="text-sm text-gray-600 hover:text-gray-900">Pricing</Link>
-            <Link to="/enterprise" className="text-sm text-gray-600 hover:text-gray-900">Enterprise</Link>
+            {!session ? (
+              <>
+                <Link to="/features" className="text-sm text-gray-600 hover:text-gray-900">Features</Link>
+                <Link to="/pricing" className="text-sm text-gray-600 hover:text-gray-900">Pricing</Link>
+                <Link to="/enterprise" className="text-sm text-gray-600 hover:text-gray-900">Enterprise</Link>
+              </>
+            ) : (
+              <>
+                <Link to="/scenarios" className="text-sm text-gray-600 hover:text-gray-900">Scenarios</Link>
+                <Link to="/history" className="text-sm text-gray-600 hover:text-gray-900">Call History</Link>
+              </>
+            )}
           </div>
         </div>
         
         <div className="flex items-center space-x-4">
           {session ? (
-            <>
-              <Link to="/scenarios">
-                <Button variant="ghost" size="sm">Scenarios</Button>
-              </Link>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleSignOut}
-              >
-                Sign Out
-              </Button>
-            </>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleSignOut}
+            >
+              Sign Out
+            </Button>
           ) : (
             <>
               <Button 
