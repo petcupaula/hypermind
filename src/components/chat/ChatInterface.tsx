@@ -104,67 +104,77 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
 
       console.log('Starting call history save with duration:', duration);
       console.log('Audio chunks:', audioChunksRef.current.length);
+      console.log('Scenario:', scenario);
 
-      let recordingUrl = null;
-      if (audioChunksRef.current.length > 0) {
-        console.log('Processing audio recording...');
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const fileName = `call-${Date.now()}.webm`;
-        const filePath = `${sessionData.session.user.id}/${fileName}`;
-        const file = new File([audioBlob], fileName, { type: 'audio/webm' });
-        
-        console.log('Uploading recording to storage...');
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('call-recordings')
-          .upload(filePath, file);
-
-        if (uploadError) {
-          console.error('Error uploading recording:', uploadError);
-          toast({
-            title: "Error",
-            description: "Failed to save recording",
-            variant: "destructive",
-          });
-        } else {
-          console.log('Recording uploaded successfully');
-          const { data: { publicUrl } } = supabase.storage
-            .from('call-recordings')
-            .getPublicUrl(filePath);
-          recordingUrl = publicUrl;
-          console.log('Public URL generated:', recordingUrl);
-        }
-      }
-
-      console.log('Saving call history to database...', {
-        user_id: sessionData.session.user.id,
-        scenario_id: scenario.id,
-        duration,
-        transcript: currentTranscript,
-        recording_url: recordingUrl
-      });
-
-      const { error } = await supabase.from('call_history').insert({
+      const { error: insertError } = await supabase.from('call_history').insert({
         user_id: sessionData.session.user.id,
         scenario_id: scenario.id,
         duration,
         transcript: currentTranscript || null,
-        recording_url: recordingUrl
       });
 
-      if (error) {
-        console.error('Error saving call history:', error);
+      if (insertError) {
+        console.error('Error saving call history:', insertError);
         toast({
           title: "Error",
           description: "Failed to save call history",
           variant: "destructive",
         });
-      } else {
-        console.log('Call history saved successfully');
-        toast({
-          title: "Success",
-          description: "Call history saved successfully",
-        });
+        return;
       }
+
+      if (audioChunksRef.current.length > 0) {
+        try {
+          console.log('Processing audio recording...');
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          const fileName = `call-${Date.now()}.webm`;
+          const filePath = `${sessionData.session.user.id}/${fileName}`;
+          const file = new File([audioBlob], fileName, { type: 'audio/webm' });
+          
+          console.log('Uploading recording to storage...');
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('call-recordings')
+            .upload(filePath, file);
+
+          if (uploadError) {
+            console.error('Error uploading recording:', uploadError);
+            throw uploadError;
+          }
+
+          console.log('Recording uploaded successfully');
+          const { data: { publicUrl } } = supabase.storage
+            .from('call-recordings')
+            .getPublicUrl(filePath);
+
+          const { error: updateError } = await supabase
+            .from('call_history')
+            .update({ recording_url: publicUrl })
+            .eq('scenario_id', scenario.id)
+            .eq('user_id', sessionData.session.user.id)
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+          if (updateError) {
+            console.error('Error updating recording URL:', updateError);
+            throw updateError;
+          }
+        } catch (error) {
+          console.error('Error handling recording:', error);
+          toast({
+            title: "Warning",
+            description: "Call saved but failed to save recording",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      console.log('Call history saved successfully');
+      toast({
+        title: "Success",
+        description: "Call history saved successfully",
+      });
+
     } catch (error) {
       console.error('Error in saveCallHistory:', error);
       toast({
@@ -268,20 +278,28 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   const stopConversation = async () => {
     console.log("Manually stopping conversation...");
     if (conversationRef.current) {
-      setLastCallDuration(duration);
-      
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-        mediaRecorderRef.current.stop();
-        console.log('Stopped recording audio');
+      try {
+        setLastCallDuration(duration);
         
-        await new Promise(resolve => setTimeout(resolve, 100));
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+          mediaRecorderRef.current.stop();
+          console.log('Stopped recording audio');
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
+        await saveCallHistory();
+        
+        conversationRef.current.endSession();
+        conversationRef.current = null;
+        setIsConnected(false);
+      } catch (error) {
+        console.error('Error during conversation stop:', error);
+        toast({
+          title: "Error",
+          description: "Failed to properly end the call",
+          variant: "destructive",
+        });
       }
-      
-      await saveCallHistory();
-      
-      conversationRef.current.endSession();
-      conversationRef.current = null;
-      setIsConnected(false);
     }
   };
 
