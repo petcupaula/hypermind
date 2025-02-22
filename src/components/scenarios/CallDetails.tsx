@@ -1,5 +1,4 @@
-
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useEffect } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -90,7 +89,6 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) throw new Error('No active session');
 
-      // Fetch the ElevenLabs API key from Supabase functions
       const { data: apiKeyData, error: apiKeyError } = await supabase
         .functions.invoke('get-secret', {
           body: { secretName: 'VITE_ELEVENLABS_API_KEY' }
@@ -148,6 +146,16 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
       });
     },
   });
+
+  useEffect(() => {
+    if (call && 
+        call.elevenlabs_conversation_id && 
+        !call.transcript_summary && 
+        !fetchElevenLabsDetails.isPending) {
+      console.log('Auto-fetching ElevenLabs conversation details...');
+      fetchElevenLabsDetails.mutate();
+    }
+  }, [call?.elevenlabs_conversation_id, call?.transcript_summary]);
 
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -215,7 +223,7 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
           <ArrowLeft className="h-4 w-4" />
           Back to Calls
         </Button>
-        {call?.elevenlabs_conversation_id && (
+        {call?.elevenlabs_conversation_id && !fetchElevenLabsDetails.isPending && (
           <Button 
             variant="outline" 
             onClick={() => fetchElevenLabsDetails.mutate()}
