@@ -1,11 +1,11 @@
 
-import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Mic } from "lucide-react";
-import { Scenario } from "@/components/scenarios/ScenarioCard";
 import { PersonaAvatar } from "./PersonaAvatar";
 import { useConversationManager } from "@/hooks/useConversationManager";
+import { Button } from "@/components/ui/button";
+import { Mic, MicOff, Phone, PhoneOff } from "lucide-react";
+import { useEffect, useState } from "react";
 import { formatDuration } from "@/utils/audio-utils";
+import { Scenario } from "../scenarios/ScenarioCard";
 
 interface ChatInterfaceProps {
   scenario: Scenario;
@@ -17,109 +17,87 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
     isSpeaking,
     duration,
     lastCallDuration,
-    mediaRecorderRef,
-    audioChunksRef,
-    timerRef,
+    currentTranscript,
     startConversation,
     stopConversation,
-    setDuration,
+    setDuration
   } = useConversationManager(scenario);
 
   useEffect(() => {
+    let intervalId: NodeJS.Timeout;
     if (isConnected) {
-      timerRef.current = setInterval(() => {
-        setDuration(prev => prev + 1);
+      intervalId = setInterval(() => {
+        setDuration((prev) => prev + 1);
       }, 1000);
-
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-          const mediaRecorder = new MediaRecorder(stream);
-          mediaRecorderRef.current = mediaRecorder;
-          
-          mediaRecorder.ondataavailable = (event) => {
-            if (event.data.size > 0) {
-              console.log('Audio data available:', event.data.size, 'bytes');
-              audioChunksRef.current.push(event.data);
-            }
-          };
-
-          mediaRecorder.start(1000);
-          console.log('Started recording audio');
-        })
-        .catch(error => {
-          console.error('Error accessing microphone:', error);
-        });
-    } else {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-        mediaRecorderRef.current.stop();
-        console.log('Stopped recording audio');
-      }
-      setDuration(0);
-      audioChunksRef.current = [];
     }
-
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-        mediaRecorderRef.current.stop();
-        console.log('Cleanup: stopped recording audio');
+      if (intervalId) {
+        clearInterval(intervalId);
       }
     };
-  }, [isConnected]);
+  }, [isConnected, setDuration]);
 
   return (
-    <div className="w-full max-w-3xl mx-auto bg-white/50 backdrop-blur-lg rounded-2xl border border-gray-200 shadow-lg">
-      <div className="border-b p-4">
-        <div className="flex items-center gap-4">
-          <PersonaAvatar 
-            avatarUrl={scenario.persona.avatarUrl} 
-            name={scenario.persona.name} 
-          />
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-1">
-              <h3 className="font-medium">{scenario.title}</h3>
-              {isConnected ? (
-                <span className="text-sm font-medium text-primary">
-                  {formatDuration(duration)}
-                </span>
-              ) : lastCallDuration ? (
-                <span className="text-sm text-gray-500">
-                  Last call: {formatDuration(lastCallDuration)}
-                </span>
-              ) : null}
-            </div>
-            <p className="text-sm text-gray-500 mb-2">{scenario.description}</p>
-            {scenario.persona.name && (
-              <div className="flex items-center gap-2 mt-2">
-                <div className="text-sm">
-                  <span className="font-medium">{scenario.persona.name}</span>
-                  {scenario.persona.role && scenario.persona.company && (
-                    <span className="text-gray-600">
-                      {" "}• {scenario.persona.role} at {scenario.persona.company}
-                    </span>
-                  )}
-                </div>
-              </div>
+    <div className="space-y-8">
+      <div className="flex items-start gap-6">
+        <PersonaAvatar 
+          avatarUrl={scenario.persona.avatarUrl} 
+          name={scenario.persona.name}
+          isSpeaking={isSpeaking}
+        />
+        <div className="flex-1">
+          <h2 className="text-2xl font-semibold mb-2">{scenario.persona.name}</h2>
+          <p className="text-gray-600">{scenario.persona.role} at {scenario.persona.company}</p>
+        </div>
+        <div className="text-right space-y-2">
+          <Button
+            variant={isConnected ? "destructive" : "default"}
+            className="gap-2"
+            onClick={isConnected ? stopConversation : startConversation}
+          >
+            {isConnected ? (
+              <>
+                <PhoneOff className="h-4 w-4" />
+                End Call
+              </>
+            ) : (
+              <>
+                <Phone className="h-4 w-4" />
+                Start Call
+              </>
             )}
-          </div>
+          </Button>
+          {isConnected && (
+            <div className="text-sm font-medium">
+              {formatDuration(duration)}
+            </div>
+          )}
+          {lastCallDuration !== null && !isConnected && (
+            <div className="text-sm text-gray-500">
+              Last call: {formatDuration(lastCallDuration)}
+            </div>
+          )}
         </div>
       </div>
-      
-      <div className="p-6 flex items-center justify-center">
-        <Button
-          size="lg"
-          className={`gap-2 ${isConnected ? 'bg-red-500 hover:bg-red-600' : 'bg-primary hover:bg-primary/90'}`}
-          onClick={isConnected ? stopConversation : startConversation}
-        >
-          <Mic className={`h-5 w-5 ${isConnected && 'animate-pulse'}`} />
-          {isConnected ? 'End Call' : 'Start Call'}
-        </Button>
+
+      <div className="bg-gray-50 rounded-lg p-6 min-h-[400px] relative">
+        <div className="absolute bottom-6 right-6">
+          {isConnected && (
+            <div className="flex items-center gap-2 text-sm">
+              <div className={`w-2 h-2 rounded-full ${isSpeaking ? 'bg-green-500' : 'bg-red-500'}`} />
+              {isSpeaking ? 'AI Speaking' : 'AI Listening'}
+            </div>
+          )}
+        </div>
+        <div className="whitespace-pre-wrap">
+          {currentTranscript || (
+            <span className="text-gray-500">
+              {isConnected
+                ? "Conversation will appear here..."
+                : "Start the call to begin the conversation"}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
