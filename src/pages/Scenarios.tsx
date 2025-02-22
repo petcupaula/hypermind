@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -30,9 +29,21 @@ const Dashboard = () => {
       const { data: scenariosData, error: scenariosError } = await supabase
         .from('scenarios')
         .select(`
-          *,
+          id,
+          scenario_id,
+          title,
+          description,
+          category,
+          difficulty,
           persona:personas (
-            *
+            id,
+            prompt,
+            first_message,
+            voice_id,
+            name,
+            role,
+            company,
+            avatar_url
           )
         `);
 
@@ -48,12 +59,14 @@ const Dashboard = () => {
 
       // Transform the data to match the Scenario type
       return scenariosData.map(scenario => ({
-        id: scenario.scenario_id,
+        id: scenario.id,
+        scenario_id: scenario.scenario_id,
         title: scenario.title,
         description: scenario.description,
         category: scenario.category,
         difficulty: scenario.difficulty as "Beginner" | "Intermediate" | "Advanced",
         persona: {
+          id: scenario.persona.id,
           prompt: scenario.persona.prompt,
           firstMessage: scenario.persona.first_message,
           voiceId: scenario.persona.voice_id,
