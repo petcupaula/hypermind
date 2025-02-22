@@ -15,6 +15,12 @@ interface CallRecord {
   transcript: string | null;
   recording_url: string | null;
   created_at: string;
+  scenarios: {
+    title: string;
+    description: string;
+    category: string;
+    difficulty: string;
+  };
 }
 
 const CallHistory = () => {
@@ -47,7 +53,7 @@ const CallHistory = () => {
         return [];
       }
 
-      return data;
+      return data as CallRecord[];
     }
   });
 
