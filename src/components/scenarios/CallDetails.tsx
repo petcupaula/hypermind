@@ -4,7 +4,24 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, ArrowLeft, RefreshCcw, Calendar, Clock, CheckCircle2, XCircle, Pause, HelpCircle } from "lucide-react";
+import {
+  Play,
+  ArrowLeft,
+  RefreshCcw,
+  Calendar,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  Pause,
+  HelpCircle,
+  Info
+} from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -349,7 +366,21 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <div className="font-medium capitalize">{key.replace(/_/g, ' ')}</div>
+                <div className="flex items-center gap-2">
+                  <div className="font-medium capitalize">{key.replace(/_/g, ' ')}</div>
+                  {result.json_schema?.description && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-[300px]">
+                          {result.json_schema.description}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
                 <div className={`text-sm px-2 py-0.5 rounded-full ${
                   result.value === null 
                     ? "bg-gray-100 text-gray-700"
@@ -363,11 +394,6 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
                    result.value}
                 </div>
               </div>
-              {result.json_schema?.description && (
-                <div className="text-sm text-muted-foreground mt-1 italic">
-                  {result.json_schema.description}
-                </div>
-              )}
               <div className="text-sm text-muted-foreground mt-2">
                 {status.description}
               </div>
