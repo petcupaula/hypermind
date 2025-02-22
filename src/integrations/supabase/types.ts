@@ -119,6 +119,7 @@ export type Database = {
           id: string
           industry: string | null
           name: string | null
+          product_name: string | null
           role: string | null
           target_market: string | null
           updated_at: string | null
@@ -132,6 +133,7 @@ export type Database = {
           id: string
           industry?: string | null
           name?: string | null
+          product_name?: string | null
           role?: string | null
           target_market?: string | null
           updated_at?: string | null
@@ -145,6 +147,7 @@ export type Database = {
           id?: string
           industry?: string | null
           name?: string | null
+          product_name?: string | null
           role?: string | null
           target_market?: string | null
           updated_at?: string | null
