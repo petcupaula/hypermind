@@ -11,48 +11,58 @@ const GenerateAvatars = () => {
   const generateAvatars = async () => {
     setIsGenerating(true);
     try {
-      // Fetch all personas that don't have avatars yet
-      const { data: personas, error } = await supabase
+      // Test with a single specific persona
+      const { data: persona, error } = await supabase
         .from('personas')
         .select('id, appearance')
-        .is('avatar_url', null);
+        .eq('id', '5b0593e7-add2-40c3-a136-a53ed70e8e6d')
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching persona:', error);
+        throw error;
+      }
 
-      let successCount = 0;
-      for (const persona of personas || []) {
-        try {
-          // Call the generate-avatar function
-          const { data, error: genError } = await supabase.functions
-            .invoke('generate-avatar', {
-              body: { appearance: persona.appearance }
-            });
+      console.log('Fetched persona:', persona);
 
-          if (genError) throw genError;
-          if (!data?.imageUrl) throw new Error('No image URL returned');
+      if (!persona) {
+        throw new Error('Persona not found');
+      }
 
-          // Update the persona with the new avatar URL
-          const { error: updateError } = await supabase
-            .from('personas')
-            .update({ avatar_url: data.imageUrl })
-            .eq('id', persona.id);
+      // Call the generate-avatar function
+      console.log('Calling generate-avatar function with appearance:', persona.appearance);
+      const { data, error: genError } = await supabase.functions
+        .invoke('generate-avatar', {
+          body: { appearance: persona.appearance }
+        });
 
-          if (updateError) throw updateError;
-          successCount++;
-        } catch (personaError) {
-          console.error(`Error generating avatar for persona ${persona.id}:`, personaError);
-        }
+      console.log('Generate avatar response:', data);
+      console.log('Generate avatar error:', genError);
+
+      if (genError) throw genError;
+      if (!data?.imageUrl) throw new Error('No image URL returned');
+
+      // Update the persona with the new avatar URL
+      console.log('Updating persona with avatar URL:', data.imageUrl);
+      const { error: updateError } = await supabase
+        .from('personas')
+        .update({ avatar_url: data.imageUrl })
+        .eq('id', persona.id);
+
+      if (updateError) {
+        console.error('Error updating persona:', updateError);
+        throw updateError;
       }
 
       toast({
         title: "Avatar Generation Complete",
-        description: `Successfully generated ${successCount} avatar${successCount !== 1 ? 's' : ''}.`,
+        description: "Successfully generated avatar for the test persona.",
       });
     } catch (error) {
       console.error('Error in avatar generation:', error);
       toast({
         title: "Error",
-        description: "Failed to generate avatars. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate avatar. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -67,7 +77,7 @@ const GenerateAvatars = () => {
         disabled={isGenerating}
         variant="outline"
       >
-        {isGenerating ? "Generating Avatars..." : "Generate Missing Avatars"}
+        {isGenerating ? "Generating Avatar..." : "Generate Test Avatar"}
       </Button>
     </div>
   );
