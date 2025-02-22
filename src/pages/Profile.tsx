@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
@@ -61,7 +60,6 @@ const Profile = () => {
       return formData;
     },
     onSuccess: (data) => {
-      // Update the cache with the new profile data
       queryClient.setQueryData(["profile"], data);
       toast({
         title: "Profile updated",
@@ -90,7 +88,6 @@ const Profile = () => {
     const form = e.currentTarget;
     const formData = new FormData(form);
     
-    // Create the updated profile object while preserving existing data
     const updatedProfile = {
       ...profile,
       name: formData.get("name") as string || profile?.name,
@@ -99,7 +96,7 @@ const Profile = () => {
       product_name: formData.get("product_name") as string || profile?.product_name,
       industry: form.querySelector('#industry')?.getAttribute('data-value') || profile?.industry,
       target_market: form.querySelector('#target_market')?.getAttribute('data-value') || profile?.target_market,
-      description: formData.get("description") as string || profile?.description,
+      product_description: formData.get("product_description") as string || profile?.product_description,
     };
     
     updateProfile.mutate(updatedProfile);

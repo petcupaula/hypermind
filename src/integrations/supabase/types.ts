@@ -115,10 +115,10 @@ export type Database = {
           avatar_url: string | null
           company: string | null
           created_at: string
-          description: string | null
           id: string
           industry: string | null
           name: string | null
+          product_description: string | null
           product_name: string | null
           role: string | null
           target_market: string | null
@@ -129,10 +129,10 @@ export type Database = {
           avatar_url?: string | null
           company?: string | null
           created_at?: string
-          description?: string | null
           id: string
           industry?: string | null
           name?: string | null
+          product_description?: string | null
           product_name?: string | null
           role?: string | null
           target_market?: string | null
@@ -143,10 +143,10 @@ export type Database = {
           avatar_url?: string | null
           company?: string | null
           created_at?: string
-          description?: string | null
           id?: string
           industry?: string | null
           name?: string | null
+          product_description?: string | null
           product_name?: string | null
           role?: string | null
           target_market?: string | null

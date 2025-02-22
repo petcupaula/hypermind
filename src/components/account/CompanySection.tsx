@@ -74,16 +74,16 @@ export function CompanySection({ profile, isEditing }: CompanySectionProps) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="description">
+            <Label htmlFor="product_description">
               Product/Service Description
             </Label>
             <p className="text-sm text-muted-foreground">
               Describe the products or services that you or your company offers to customers
             </p>
             <Textarea
-              id="description"
-              name="description"
-              defaultValue={profile?.description || ""}
+              id="product_description"
+              name="product_description"
+              defaultValue={profile?.product_description || ""}
               disabled={!isEditing}
               className="min-h-[100px]"
               placeholder="E.g., We provide enterprise-grade cybersecurity solutions that protect companies from advanced cyber threats..."
