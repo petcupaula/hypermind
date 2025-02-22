@@ -14,6 +14,7 @@ export interface Scenario {
     name?: string;
     role?: string;
     company?: string;
+    avatarUrl?: string;
   };
   difficulty: "Beginner" | "Intermediate" | "Advanced";
   category: string;
@@ -29,7 +30,15 @@ const ScenarioCard = ({ scenario, onStart }: ScenarioCardProps) => {
     <Card className="p-6 hover:shadow-lg transition-shadow">
       <div className="flex items-start gap-4">
         <div className="bg-primary/10 p-3 rounded-lg">
-          <Bot className="h-6 w-6 text-primary" />
+          {scenario.persona.avatarUrl ? (
+            <img
+              src={scenario.persona.avatarUrl}
+              alt={scenario.persona.name || "Persona avatar"}
+              className="w-12 h-12 rounded-lg object-cover"
+            />
+          ) : (
+            <Bot className="h-6 w-6 text-primary" />
+          )}
         </div>
         <div className="flex-1">
           <div className="flex items-start justify-between gap-4">

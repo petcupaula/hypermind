@@ -163,8 +163,16 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
     <div className="w-full max-w-3xl mx-auto bg-white/50 backdrop-blur-lg rounded-2xl border border-gray-200 shadow-lg">
       <div className="border-b p-4">
         <div className="flex items-center gap-4">
-          <div className="bg-primary/10 p-2 rounded-lg">
-            <Bot className="h-5 w-5 text-primary" />
+          <div className="bg-primary/10 p-3 rounded-lg">
+            {scenario.persona.avatarUrl ? (
+              <img
+                src={scenario.persona.avatarUrl}
+                alt={scenario.persona.name || "Persona avatar"}
+                className="w-12 h-12 rounded-lg object-cover"
+              />
+            ) : (
+              <Bot className="h-5 w-5 text-primary" />
+            )}
           </div>
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1">
