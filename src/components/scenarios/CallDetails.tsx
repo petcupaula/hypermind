@@ -60,6 +60,35 @@ type CallRecord = Database["public"]["Tables"]["call_history"]["Row"] & {
   };
 };
 
+const isGoodTalkListenRatio = (ratio: number) => {
+  return ratio >= 0.8 && ratio <= 1.3;
+};
+
+const getDataCollectionResultStatus = (key: string, value: boolean | number | null): { isGood: boolean; description: string } => {
+  if (value === null) {
+    return { isGood: false, description: "Not collected" };
+  }
+
+  switch (key) {
+    case "talk_listen_ratio":
+      return {
+        isGood: isGoodTalkListenRatio(value as number),
+        description: isGoodTalkListenRatio(value as number) 
+          ? "Good balance between talking and listening" 
+          : "Imbalanced conversation ratio"
+      };
+    case "next_steps":
+    case "social_proof":
+    case "question_preconception":
+      return {
+        isGood: value as boolean,
+        description: value ? "Successfully achieved" : "Need improvement"
+      };
+    default:
+      return { isGood: true, description: "" };
+  }
+};
+
 const CallDetails = ({ id: propId }: CallDetailsProps) => {
   const { id: urlId } = useParams();
   const id = propId || urlId;
@@ -301,26 +330,53 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
     const typedResults = results as DataCollectionResults;
     if (!typedResults || typeof typedResults !== 'object') return null;
 
-    return Object.entries(typedResults).map(([key, result]) => (
-      <div key={key} className="bg-muted/50 rounded-lg p-4">
-        <div className="font-medium mb-2 capitalize">{key.replace(/_/g, ' ')}</div>
-        <div className="space-y-2">
-          <div className="text-sm font-medium">
-            Value: {result.value === null ? 'Not collected' : 
-                     typeof result.value === 'boolean' ? (result.value ? 'Yes' : 'No') : 
-                     result.value}
-          </div>
-          {result.json_schema?.description && (
-            <div className="text-sm text-muted-foreground italic">
-              {result.json_schema.description}
+    return Object.entries(typedResults).map(([key, result]) => {
+      const status = getDataCollectionResultStatus(key, result.value);
+      
+      return (
+        <div key={key} className="bg-muted/50 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 mt-1">
+              {result.value !== null && (
+                status.isGood ? (
+                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-red-500" />
+                )
+              )}
             </div>
-          )}
-          <div className="text-sm text-muted-foreground">
-            {result.rationale}
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <div className="font-medium capitalize">{key.replace(/_/g, ' ')}</div>
+                <div className={`text-sm px-2 py-0.5 rounded-full ${
+                  result.value === null 
+                    ? "bg-gray-100 text-gray-700"
+                    : status.isGood
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                }`}>
+                  {result.value === null ? 'Not collected' : 
+                   typeof result.value === 'boolean' ? (result.value ? 'Yes' : 'No') : 
+                   typeof result.value === 'number' ? result.value.toFixed(2) : 
+                   result.value}
+                </div>
+              </div>
+              {result.json_schema?.description && (
+                <div className="text-sm text-muted-foreground mt-1 italic">
+                  {result.json_schema.description}
+                </div>
+              )}
+              <div className="text-sm text-muted-foreground mt-2">
+                {status.description}
+              </div>
+              <div className="text-sm text-muted-foreground mt-2 pt-2 border-t border-border/50">
+                {result.rationale}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    ));
+      );
+    });
   };
 
   if (isLoading) {
