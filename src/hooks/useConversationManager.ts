@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { useConversation } from "@11labs/react";
 import { useToast } from "@/components/ui/use-toast";
@@ -25,30 +26,54 @@ export const useConversationManager = (scenario: Scenario) => {
       audioContextRef.current = new AudioContext();
       destinationRef.current = audioContextRef.current.createMediaStreamDestination();
 
+      // Connect microphone input
       const micSource = audioContextRef.current.createMediaStreamSource(stream);
       micSource.connect(destinationRef.current);
 
+      // Create and configure audio element for AI output
       const audioElement = new Audio();
       audioElement.autoplay = true;
-      
+
+      // Create a gain node to control AI volume in the recording
+      const gainNode = audioContextRef.current.createGain();
+      gainNode.gain.value = 1.0; // Adjust this value to balance AI volume in recording
+
+      // Set up audio handling when AI starts speaking
       audioElement.addEventListener('play', () => {
         if (audioContextRef.current && destinationRef.current) {
-          const aiSource = audioContextRef.current.createMediaElementSource(audioElement);
-          aiSource.connect(destinationRef.current);
-          aiSource.connect(audioContextRef.current.destination);
+          try {
+            // Create a new MediaElementSourceNode for the AI audio
+            const aiSource = audioContextRef.current.createMediaElementSource(audioElement);
+            
+            // Connect AI audio through gain node to both destination (recording) and speakers
+            aiSource.connect(gainNode);
+            gainNode.connect(destinationRef.current);
+            gainNode.connect(audioContextRef.current.destination);
+
+            console.log('Successfully connected AI audio to recording destination');
+          } catch (error) {
+            console.error('Error connecting AI audio:', error);
+          }
         }
       });
 
+      // Set up MediaRecorder with the combined stream
       const combinedStream = destinationRef.current.stream;
-      const mediaRecorder = new MediaRecorder(combinedStream);
+      const mediaRecorder = new MediaRecorder(combinedStream, {
+        mimeType: 'audio/webm;codecs=opus',
+        audioBitsPerSecond: 128000
+      });
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
+          console.log('Recording data available:', event.data.size, 'bytes');
           audioChunksRef.current.push(event.data);
         }
       };
 
-      mediaRecorder.start();
+      // Start recording
+      mediaRecorder.start(1000); // Collect data every second
+      console.log('Started MediaRecorder with combined audio streams');
       mediaRecorderRef.current = mediaRecorder;
 
       return audioElement;
