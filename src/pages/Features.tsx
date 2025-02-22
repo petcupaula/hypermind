@@ -2,12 +2,14 @@
 import { Bot, Brain, BarChart2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import Navigation from "@/components/layout/Navigation";
 
 const Features = () => {
   const navigate = useNavigate();
   
   return (
     <div className="min-h-screen">
+      <Navigation />
       <div className="relative overflow-hidden">
         {/* Gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 -z-10" />

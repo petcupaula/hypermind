@@ -1,9 +1,12 @@
+
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Building2, Shield, Users2, Headphones } from "lucide-react";
+import Navigation from "@/components/layout/Navigation";
 
 const Enterprise = () => {
   return (
     <div className="min-h-screen">
+      <Navigation />
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 -z-10" />
         
