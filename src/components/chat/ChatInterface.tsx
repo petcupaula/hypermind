@@ -59,15 +59,19 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
     },
     onMessage: (message) => {
       console.log("Received message:", message);
-      if (message.type === 'agent_response_started') {
+      
+      if ('source' in message) {
+        const messageText = message.message;
+        if (typeof messageText === 'string') {
+          transcriptMessagesRef.current.push(`${message.source}: ${messageText}`);
+          setCurrentTranscript(prev => prev + "\n" + `${message.source}: ${messageText}`);
+        }
+      } else if (message.type === 'agent_response_started') {
         console.log("Agent started speaking");
         setIsSpeaking(true);
       } else if (message.type === 'agent_response_ended') {
         console.log("Agent finished speaking");
         setIsSpeaking(false);
-      } else if (message.type === 'transcript') {
-        transcriptMessagesRef.current.push(message.text);
-        setCurrentTranscript(prev => prev + "\n" + message.text);
       }
     },
     onError: (error) => {
