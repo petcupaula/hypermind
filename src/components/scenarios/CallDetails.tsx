@@ -269,8 +269,8 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
           <XCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
         )}
         <div>
-          <p className="font-medium">{result.criterion}</p>
-          <p className="text-sm text-muted-foreground">{result.explanation}</p>
+          <div className="font-medium">{result.criterion}</div>
+          <div className="text-sm text-muted-foreground">{result.explanation}</div>
         </div>
       </div>
     ));
@@ -282,8 +282,8 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
 
     return typedResults.map((result, index) => (
       <div key={index} className="bg-muted/50 rounded-lg p-4">
-        <p className="font-medium mb-1">{result.field}</p>
-        <p className="text-sm">{result.value || 'Not collected'}</p>
+        <div className="font-medium mb-1">{result.field}</div>
+        <div className="text-sm">{result.value || 'Not collected'}</div>
       </div>
     ));
   };
@@ -321,19 +321,21 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
           <div className="flex items-start justify-between">
             <div>
               <CardTitle className="text-2xl">{call.scenarios.title}</CardTitle>
-              <CardDescription className="mt-2 space-y-2">
-                <p className="text-base">{call.scenarios.description}</p>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-primary">
-                    {call.scenarios.persona.name} • {call.scenarios.persona.role} at {call.scenarios.persona.company}
-                  </p>
-                  <span className={`inline-block text-xs px-2 py-1 rounded-full ${
-                    call.scenarios.difficulty === "Beginner" ? "bg-green-100 text-green-700" :
-                    call.scenarios.difficulty === "Intermediate" ? "bg-yellow-100 text-yellow-700" :
-                    "bg-red-100 text-red-700"
-                  }`}>
-                    {call.scenarios.difficulty}
-                  </span>
+              <CardDescription>
+                <div className="mt-2 space-y-2">
+                  <div className="text-base">{call.scenarios.description}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-sm font-medium text-primary">
+                      {call.scenarios.persona.name} • {call.scenarios.persona.role} at {call.scenarios.persona.company}
+                    </div>
+                    <span className={`inline-block text-xs px-2 py-1 rounded-full ${
+                      call.scenarios.difficulty === "Beginner" ? "bg-green-100 text-green-700" :
+                      call.scenarios.difficulty === "Intermediate" ? "bg-yellow-100 text-yellow-700" :
+                      "bg-red-100 text-red-700"
+                    }`}>
+                      {call.scenarios.difficulty}
+                    </span>
+                  </div>
                 </div>
               </CardDescription>
             </div>
