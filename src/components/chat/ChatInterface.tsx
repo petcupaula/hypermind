@@ -1,79 +1,79 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Send, Bot, Volume2, VolumeX } from "lucide-react";
-import { useConversation } from "@11labs/react";
+import { Mic, Bot, Volume2, VolumeX } from "lucide-react";
+import { AudioRecorder } from "@/utils/audio";
 
 const ChatInterface = () => {
-  const [message, setMessage] = useState("");
+  const [isConnected, setIsConnected] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content: "Hello! I'm interested in learning more about your solution. We're currently facing some challenges with our data infrastructure. Can you tell me how your product might help?"
-    }
-  ]);
-
-  // Initialize ElevenLabs conversation
-  const conversation = useConversation({
-    apiKey: import.meta.env.VITE_ELEVENLABS_API_KEY,
-    voiceId: "CwhRBWXzGAHq8TQ4Fs17", // Using Roger voice
-    model: "eleven_turbo_v2",
-  });
+  const wsRef = useRef<WebSocket | null>(null);
+  const audioQueueRef = useRef<AudioQueue>(new AudioQueue(new AudioContext()));
+  const recorderRef = useRef<AudioRecorder | null>(null);
 
   useEffect(() => {
-    // Start the conversation session when component mounts
-    const initConversation = async () => {
-      try {
-        await conversation.startSession({});
-      } catch (error) {
-        console.error("Error starting conversation:", error);
-      }
-    };
-
-    initConversation();
-
-    // Clean up the conversation session when component unmounts
     return () => {
-      conversation.endSession();
+      wsRef.current?.close();
+      recorderRef.current?.stop();
     };
-  }, [conversation]);
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message.trim()) return;
-
-    // Add user message to chat
-    const userMessage = { role: "user", content: message };
-    setMessages(prev => [...prev, userMessage]);
-
-    // Clear input
-    setMessage("");
-
-    // AI response
-    const aiResponse = {
-      role: "assistant",
-      content: "Our solution provides a robust data infrastructure that can handle your enterprise needs. We offer seamless integration, real-time analytics, and scalable architecture that can grow with your business. Would you like me to elaborate on any specific aspect?"
-    };
-
-    // Add AI response to chat
-    setMessages(prev => [...prev, aiResponse]);
-
+  const startConversation = async () => {
     try {
-      // Use the conversation to speak the response
-      const blob = new Blob([aiResponse.content], { type: 'text/plain' });
-      const audio = new Audio(URL.createObjectURL(blob));
-      audio.play();
+      // Connect to our Supabase Edge Function WebSocket
+      wsRef.current = new WebSocket(`wss://${import.meta.env.VITE_SUPABASE_PROJECT_REF}.functions.supabase.co/realtime-chat`);
+
+      wsRef.current.onmessage = async (event) => {
+        const data = JSON.parse(event.data);
+        
+        if (data.type === 'response.audio.delta') {
+          // Convert base64 to audio data and play
+          const binaryString = atob(data.delta);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          await audioQueueRef.current.addToQueue(bytes);
+          setIsSpeaking(true);
+        } else if (data.type === 'response.audio.done') {
+          setIsSpeaking(false);
+        }
+      };
+
+      wsRef.current.onopen = async () => {
+        setIsConnected(true);
+        
+        // Start recording audio
+        recorderRef.current = new AudioRecorder((audioData: Float32Array) => {
+          if (wsRef.current?.readyState === WebSocket.OPEN) {
+            const event = {
+              type: 'input_audio_buffer.append',
+              audio: encodeAudioData(audioData)
+            };
+            wsRef.current.send(JSON.stringify(event));
+          }
+        });
+        
+        await recorderRef.current.start();
+      };
+
     } catch (error) {
-      console.error("Error generating speech:", error);
+      console.error("Error starting conversation:", error);
     }
   };
 
-  const toggleMute = async () => {
-    if (conversation.isSpeaking) {
-      await conversation.setVolume({ volume: isMuted ? 1 : 0 });
-      setIsMuted(!isMuted);
+  const stopConversation = () => {
+    recorderRef.current?.stop();
+    wsRef.current?.close();
+    setIsConnected(false);
+    setIsSpeaking(false);
+  };
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    if (audioQueueRef.current) {
+      audioQueueRef.current.setVolume(isMuted ? 1 : 0);
     }
   };
 
@@ -90,48 +90,33 @@ const ChatInterface = () => {
               <p className="text-sm text-gray-500">Tech-savvy decision maker at a Fortune 500 company</p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleMute}
-            className={conversation.isSpeaking ? "opacity-100" : "opacity-50"}
-          >
-            {isMuted ? (
-              <VolumeX className="h-5 w-5" />
-            ) : (
-              <Volume2 className="h-5 w-5" />
-            )}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleMute}
+              className={isSpeaking ? "opacity-100" : "opacity-50"}
+            >
+              {isMuted ? (
+                <VolumeX className="h-5 w-5" />
+              ) : (
+                <Volume2 className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
       
-      <div className="h-[400px] p-6 overflow-y-auto">
-        <div className="space-y-4">
-          {messages.map((msg, index) => (
-            <div key={index} className="flex items-start gap-4">
-              <div className={`flex-1 ${msg.role === "assistant" ? "bg-primary/5" : "bg-blue-50"} rounded-2xl p-4`}>
-                <p className="text-sm text-gray-800">
-                  {msg.content}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+      <div className="p-6 flex items-center justify-center">
+        <Button
+          size="lg"
+          className={`gap-2 ${isConnected ? 'bg-red-500 hover:bg-red-600' : 'bg-primary hover:bg-primary/90'}`}
+          onClick={isConnected ? stopConversation : startConversation}
+        >
+          <Mic className={`h-5 w-5 ${isConnected && 'animate-pulse'}`} />
+          {isConnected ? 'End Call' : 'Start Call'}
+        </Button>
       </div>
-      
-      <form onSubmit={handleSubmit} className="border-t p-4">
-        <div className="flex items-end gap-4">
-          <Textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type your response..."
-            className="min-h-[60px] resize-none bg-transparent"
-          />
-          <Button type="submit" size="icon" className="shrink-0">
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
-      </form>
     </div>
   );
 };
