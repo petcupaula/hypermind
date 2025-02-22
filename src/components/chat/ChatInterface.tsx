@@ -52,20 +52,7 @@ const ChatInterface = () => {
         variant: "destructive",
       });
       setIsConnected(false);
-    },
-    overrides: {
-      agent: {
-        prompt: {
-          prompt: "You are an Enterprise CTO Persona, a tech-savvy decision maker at a Fortune 500 company. Help users understand our product offerings and make informed decisions.",
-          language: "en",
-        },
-        firstMessage: "Hello! I'm your Enterprise CTO advisor. How can I assist you with your technology decisions today?",
-      },
-      tts: {
-        model_id: "eleven_multilingual_v2",
-        voice_id: "pqHfZKP75CvOlQylNhV4", // Changed from voiceId to voice_id
-      },
-    },
+    }
   });
 
   const startConversation = async () => {
