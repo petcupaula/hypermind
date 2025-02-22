@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, Bot } from "lucide-react";
@@ -83,14 +84,11 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
     },
   });
 
-  const formatDuration = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
   const saveCallHistory = async () => {
-    if (!duration) return;
+    if (!duration) {
+      console.log('No duration recorded, skipping call history save');
+      return;
+    }
 
     try {
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -99,14 +97,21 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
         return;
       }
 
+      console.log('Starting call history save with duration:', duration);
+      console.log('Audio chunks:', audioChunksRef.current.length);
+
       let recordingUrl = null;
       if (audioChunksRef.current.length > 0) {
+        console.log('Processing audio recording...');
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const file = new File([audioBlob], `call-${Date.now()}.webm`, { type: 'audio/webm' });
+        const fileName = `call-${Date.now()}.webm`;
+        const filePath = `${sessionData.session.user.id}/${fileName}`;
+        const file = new File([audioBlob], fileName, { type: 'audio/webm' });
         
+        console.log('Uploading recording to storage...');
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('call-recordings')
-          .upload(`${sessionData.session.user.id}/${file.name}`, file);
+          .upload(filePath, file);
 
         if (uploadError) {
           console.error('Error uploading recording:', uploadError);
@@ -116,18 +121,28 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
             variant: "destructive",
           });
         } else {
+          console.log('Recording uploaded successfully');
           const { data: { publicUrl } } = supabase.storage
             .from('call-recordings')
-            .getPublicUrl(`${sessionData.session.user.id}/${file.name}`);
+            .getPublicUrl(filePath);
           recordingUrl = publicUrl;
+          console.log('Public URL generated:', recordingUrl);
         }
       }
+
+      console.log('Saving call history to database...', {
+        user_id: sessionData.session.user.id,
+        scenario_id: scenario.id,
+        duration,
+        transcript: currentTranscript,
+        recording_url: recordingUrl
+      });
 
       const { error } = await supabase.from('call_history').insert({
         user_id: sessionData.session.user.id,
         scenario_id: scenario.id,
         duration,
-        transcript: currentTranscript,
+        transcript: currentTranscript || null,
         recording_url: recordingUrl
       });
 
@@ -140,6 +155,10 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
         });
       } else {
         console.log('Call history saved successfully');
+        toast({
+          title: "Success",
+          description: "Call history saved successfully",
+        });
       }
     } catch (error) {
       console.error('Error in saveCallHistory:', error);
@@ -164,13 +183,22 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
           mediaRecorderRef.current = mediaRecorder;
           
           mediaRecorder.ondataavailable = (event) => {
-            audioChunksRef.current.push(event.data);
+            if (event.data.size > 0) {
+              console.log('Audio data available:', event.data.size, 'bytes');
+              audioChunksRef.current.push(event.data);
+            }
           };
 
-          mediaRecorder.start();
+          mediaRecorder.start(1000); // Collect data every second
+          console.log('Started recording audio');
         })
         .catch(error => {
           console.error('Error accessing microphone:', error);
+          toast({
+            title: "Error",
+            description: "Failed to access microphone",
+            variant: "destructive",
+          });
         });
     } else {
       if (timerRef.current) {
@@ -179,6 +207,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
       }
       if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
         mediaRecorderRef.current.stop();
+        console.log('Stopped recording audio');
       }
       setDuration(0);
       setCurrentTranscript("");
@@ -191,18 +220,10 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
       }
       if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
         mediaRecorderRef.current.stop();
+        console.log('Cleanup: stopped recording audio');
       }
     };
   }, [isConnected]);
-
-  useEffect(() => {
-    return () => {
-      console.log("Component unmounting, cleaning up conversation...");
-      if (conversationRef.current) {
-        conversationRef.current.endSession();
-      }
-    };
-  }, []);
 
   const startConversation = async () => {
     try {
