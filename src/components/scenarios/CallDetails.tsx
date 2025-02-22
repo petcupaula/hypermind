@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
@@ -159,11 +160,11 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => navigate('/scenarios')} className="gap-2">
+        <Button variant="ghost" onClick={() => navigate('/history')} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Calls
         </Button>
-        {call.elevenlabs_conversation_id && (
+        {call?.elevenlabs_conversation_id && (
           <Button 
             variant="outline" 
             onClick={() => fetchElevenLabsDetails.mutate()}
