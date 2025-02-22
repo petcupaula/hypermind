@@ -19,6 +19,8 @@ serve(async (req) => {
       throw new Error('Appearance description is required')
     }
 
+    console.log('Generating image for appearance:', appearance);
+
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -36,6 +38,7 @@ serve(async (req) => {
     })
 
     const data = await response.json()
+    console.log('DALL-E response:', data);
 
     if (data.error) {
       throw new Error(data.error.message)
@@ -46,6 +49,7 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
+    console.error('Error in generate-avatar function:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
