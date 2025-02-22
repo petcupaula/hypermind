@@ -1,100 +1,82 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, Bot, Volume2, VolumeX } from "lucide-react";
-import { AudioRecorder, AudioQueue, encodeAudioData } from "@/utils/audio";
+import { useConversation } from "@11labs/react";
 import { useToast } from "@/components/ui/use-toast";
 
 const ChatInterface = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const wsRef = useRef<WebSocket | null>(null);
-  const audioQueueRef = useRef<AudioQueue>(new AudioQueue(new AudioContext()));
-  const recorderRef = useRef<AudioRecorder | null>(null);
+  const [volume, setVolume] = useState(1);
   const { toast } = useToast();
 
-  useEffect(() => {
-    return () => {
-      wsRef.current?.close();
-      recorderRef.current?.stop();
-    };
-  }, []);
+  // Initialize ElevenLabs conversation
+  const conversation = useConversation({
+    onConnect: () => {
+      console.log("Connected to ElevenLabs");
+      setIsConnected(true);
+      toast({
+        title: "Connected",
+        description: "Voice chat is now active",
+      });
+    },
+    onDisconnect: () => {
+      console.log("Disconnected from ElevenLabs");
+      setIsConnected(false);
+      toast({
+        title: "Disconnected",
+        description: "Voice chat connection ended",
+      });
+    },
+    onMessage: (message) => {
+      console.log("Received message:", message);
+      if (message.type === 'agent_response_started') {
+        setIsSpeaking(true);
+      } else if (message.type === 'agent_response_ended') {
+        setIsSpeaking(false);
+      }
+    },
+    onError: (error) => {
+      console.error("ElevenLabs error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to establish voice chat connection",
+        variant: "destructive",
+      });
+    },
+    overrides: {
+      agent: {
+        prompt: {
+          prompt: "You are an Enterprise CTO Persona, a tech-savvy decision maker at a Fortune 500 company. Help users understand our product offerings and make informed decisions.",
+        },
+        firstMessage: "Hello! I'm your Enterprise CTO advisor. How can I assist you with your technology decisions today?",
+        language: "en",
+      },
+      tts: {
+        voiceId: "pqHfZKP75CvOlQylNhV4", // Bill's voice ID - professional and authoritative
+      },
+    },
+  });
 
   const startConversation = async () => {
     try {
       console.log("Starting conversation...");
       
-      // Connect to our Supabase Edge Function WebSocket using the hardcoded project reference
-      const wsUrl = `wss://kxhgglespuzmuyxmipsc.supabase.co/functions/v1/realtime-chat`;
-      console.log("Connecting to WebSocket:", wsUrl);
+      // Request microphone access before starting
+      await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      wsRef.current = new WebSocket(wsUrl);
-
-      wsRef.current.onopen = async () => {
-        console.log("WebSocket connection opened");
-        setIsConnected(true);
-        toast({
-          title: "Connected",
-          description: "Voice chat is now active",
-        });
-        
-        // Start recording audio
-        recorderRef.current = new AudioRecorder((audioData: Float32Array) => {
-          if (wsRef.current?.readyState === WebSocket.OPEN) {
-            const event = {
-              type: 'input_audio_buffer.append',
-              audio: encodeAudioData(audioData)
-            };
-            wsRef.current.send(JSON.stringify(event));
-          }
-        });
-        
-        await recorderRef.current.start();
-        console.log("Audio recording started");
-      };
-
-      wsRef.current.onmessage = async (event) => {
-        console.log("Received WebSocket message:", event.data);
-        const data = JSON.parse(event.data);
-        
-        if (data.type === 'response.audio.delta') {
-          // Convert base64 to audio data and play
-          const binaryString = atob(data.delta);
-          const bytes = new Uint8Array(binaryString.length);
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
-          await audioQueueRef.current.addToQueue(bytes);
-          setIsSpeaking(true);
-        } else if (data.type === 'response.audio.done') {
-          setIsSpeaking(false);
-        }
-      };
-
-      wsRef.current.onerror = (error) => {
-        console.error("WebSocket error:", error);
-        toast({
-          title: "Connection Error",
-          description: "Failed to establish voice chat connection",
-          variant: "destructive",
-        });
-      };
-
-      wsRef.current.onclose = () => {
-        console.log("WebSocket connection closed");
-        setIsConnected(false);
-        toast({
-          title: "Disconnected",
-          description: "Voice chat connection ended",
-        });
-      };
-
+      // Start the conversation with your agent ID
+      await conversation.startSession({
+        agentId: "agent_id_here", // Replace with your agent ID from ElevenLabs
+      });
+      
     } catch (error) {
       console.error("Error starting conversation:", error);
       toast({
         title: "Error",
-        description: "Failed to start voice chat",
+        description: "Failed to start voice chat. Please ensure microphone access is allowed.",
         variant: "destructive",
       });
     }
@@ -102,18 +84,23 @@ const ChatInterface = () => {
 
   const stopConversation = () => {
     console.log("Stopping conversation...");
-    recorderRef.current?.stop();
-    wsRef.current?.close();
-    setIsConnected(false);
-    setIsSpeaking(false);
+    conversation.endSession();
   };
 
   const toggleMute = () => {
+    const newVolume = isMuted ? 1 : 0;
     setIsMuted(!isMuted);
-    if (audioQueueRef.current) {
-      audioQueueRef.current.setVolume(isMuted ? 1 : 0);
-    }
+    setVolume(newVolume);
+    conversation.setVolume({ volume: newVolume });
   };
+
+  useEffect(() => {
+    return () => {
+      if (isConnected) {
+        conversation.endSession();
+      }
+    };
+  }, [isConnected, conversation]);
 
   return (
     <div className="w-full max-w-3xl mx-auto bg-white/50 backdrop-blur-lg rounded-2xl border border-gray-200 shadow-lg">

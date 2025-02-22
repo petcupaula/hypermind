@@ -20,7 +20,4 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  define: {
-    'process.env.ELEVENLABS_API_KEY': JSON.stringify(import.meta.env.VITE_ELEVENLABS_API_KEY),
-  },
 }));
