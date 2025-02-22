@@ -62,11 +62,8 @@ const ChatInterface = () => {
         language: "en",
       },
       tts: {
-        model_id: "eleven_multilingual_v2", // Specifying the model ID as per documentation
-        voiceId: "pqHfZKP75CvOlQylNhV4", // Bill's voice ID - professional and authoritative
-      },
-      websocket: {
-        url: "wss://api.elevenlabs.io/v1/conversation", // Correct WebSocket endpoint
+        model_id: "eleven_multilingual_v2",
+        voiceId: "pqHfZKP75CvOlQylNhV4",
       },
     },
   });
@@ -81,15 +78,14 @@ const ChatInterface = () => {
       
       // Start the conversation with your agent ID
       console.log("Initiating ElevenLabs session...");
-      const response = await conversation.startSession({
+      await conversation.startSession({
         agentId: "IFTHFHzCj8SPqmuq1gSq",
         connectionOptions: {
-          reconnect: true, // Enable auto-reconnection
+          reconnect: true,
           maxRetries: 3,
         },
       });
       
-      console.log("Session started with response:", response);
       conversationRef.current = conversation;
       
     } catch (error) {
@@ -107,6 +103,7 @@ const ChatInterface = () => {
     console.log("Manually stopping conversation...");
     if (conversationRef.current) {
       conversationRef.current.endSession();
+      conversationRef.current = null;
     }
   };
 
