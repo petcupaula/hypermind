@@ -265,10 +265,20 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
     }
   };
 
-  const stopConversation = () => {
+  const stopConversation = async () => {
     console.log("Manually stopping conversation...");
     if (conversationRef.current) {
       setLastCallDuration(duration);
+      
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.stop();
+        console.log('Stopped recording audio');
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
+      await saveCallHistory();
+      
       conversationRef.current.endSession();
       conversationRef.current = null;
       setIsConnected(false);
