@@ -14,6 +14,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [duration, setDuration] = useState(0);
+  const [lastCallDuration, setLastCallDuration] = useState<number | null>(null);
   const { toast } = useToast();
   const conversationRef = useRef(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -33,6 +34,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
       console.log("Disconnected from ElevenLabs - Cleaning up session...");
       if (isConnected) {
         setIsConnected(false);
+        setLastCallDuration(duration);
         toast({
           title: "Disconnected",
           description: "Voice chat connection ended",
@@ -103,6 +105,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   const startConversation = async () => {
     try {
       console.log("Starting conversation - Requesting microphone access...");
+      setLastCallDuration(null); // Reset last call duration when starting new call
       
       // Request microphone access before starting
       const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -140,6 +143,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   const stopConversation = () => {
     console.log("Manually stopping conversation...");
     if (conversationRef.current) {
+      setLastCallDuration(duration); // Store the duration when manually stopping
       conversationRef.current.endSession();
       conversationRef.current = null;
       setIsConnected(false);
@@ -165,11 +169,15 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1">
               <h3 className="font-medium">{scenario.title}</h3>
-              {isConnected && (
+              {isConnected ? (
                 <span className="text-sm font-medium text-primary">
                   {formatDuration(duration)}
                 </span>
-              )}
+              ) : lastCallDuration ? (
+                <span className="text-sm text-gray-500">
+                  Last call: {formatDuration(lastCallDuration)}
+                </span>
+              ) : null}
             </div>
             <p className="text-sm text-gray-500 mb-2">{scenario.description}</p>
             {scenario.persona.name && (
