@@ -90,16 +90,21 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) throw new Error('No active session');
 
-      const apiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
-      if (!apiKey) {
-        throw new Error('ElevenLabs API key is not configured');
+      // Fetch the ElevenLabs API key from Supabase functions
+      const { data: apiKeyData, error: apiKeyError } = await supabase
+        .functions.invoke('get-secret', {
+          body: { secretName: 'VITE_ELEVENLABS_API_KEY' }
+        });
+      
+      if (apiKeyError || !apiKeyData?.secret) {
+        throw new Error('Failed to fetch ElevenLabs API key');
       }
 
-      console.log('Making ElevenLabs API call with API key present:', !!apiKey);
+      console.log('Making ElevenLabs API call with API key present:', !!apiKeyData.secret);
 
       const response = await fetch(`https://api.elevenlabs.io/v1/convai/conversations/${call.elevenlabs_conversation_id}`, {
         headers: {
-          'xi-api-key': apiKey,
+          'xi-api-key': apiKeyData.secret,
         },
       });
 
