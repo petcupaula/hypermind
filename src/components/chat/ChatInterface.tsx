@@ -25,8 +25,8 @@ const ChatInterface = () => {
     try {
       console.log("Starting conversation...");
       
-      // Connect to our Supabase Edge Function WebSocket
-      const wsUrl = `wss://${import.meta.env.VITE_SUPABASE_PROJECT_REF}.supabase.co/functions/v1/realtime-chat`;
+      // Connect to our Supabase Edge Function WebSocket using the hardcoded project reference
+      const wsUrl = `wss://kxhgglespuzmuyxmipsc.supabase.co/functions/v1/realtime-chat`;
       console.log("Connecting to WebSocket:", wsUrl);
       
       wsRef.current = new WebSocket(wsUrl);
