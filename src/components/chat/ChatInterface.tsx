@@ -15,6 +15,7 @@ const ChatInterface = () => {
 
   // Initialize ElevenLabs conversation
   const conversation = useConversation({
+    api_key: process.env.ELEVENLABS_API_KEY, // This should be set in your environment variables
     onConnect: () => {
       console.log("Connected to ElevenLabs - Setting up session...");
       setIsConnected(true);
@@ -61,7 +62,11 @@ const ChatInterface = () => {
         language: "en",
       },
       tts: {
+        model_id: "eleven_multilingual_v2", // Specifying the model ID as per documentation
         voiceId: "pqHfZKP75CvOlQylNhV4", // Bill's voice ID - professional and authoritative
+      },
+      websocket: {
+        url: "wss://api.elevenlabs.io/v1/conversation", // Correct WebSocket endpoint
       },
     },
   });
@@ -76,12 +81,16 @@ const ChatInterface = () => {
       
       // Start the conversation with your agent ID
       console.log("Initiating ElevenLabs session...");
-      await conversation.startSession({
+      const response = await conversation.startSession({
         agentId: "IFTHFHzCj8SPqmuq1gSq",
+        connectionOptions: {
+          reconnect: true, // Enable auto-reconnection
+          maxRetries: 3,
+        },
       });
       
+      console.log("Session started with response:", response);
       conversationRef.current = conversation;
-      console.log("Session started successfully");
       
     } catch (error) {
       console.error("Error starting conversation:", error);
