@@ -51,7 +51,7 @@ export function CompanySection({ profile, isEditing }: CompanySectionProps) {
   return (
     <Card>
       <CardContent className="pt-6">
-        <form id="profile-form" className="space-y-6">
+        <div className="space-y-6">
           <div className="grid gap-2">
             <Label htmlFor="company">Company Name</Label>
             <Input
@@ -128,7 +128,7 @@ export function CompanySection({ profile, isEditing }: CompanySectionProps) {
               placeholder="E.g., We provide enterprise-grade cybersecurity solutions that protect companies from advanced cyber threats..."
             />
           </div>
-        </form>
+        </div>
       </CardContent>
     </Card>
   );

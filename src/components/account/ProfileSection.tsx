@@ -15,7 +15,7 @@ export function ProfileSection({ profile, isEditing, onAvatarChange, avatarFile 
   return (
     <Card>
       <CardContent className="pt-6">
-        <form id="profile-form" className="space-y-6">
+        <div className="space-y-6">
           <div className="flex items-center gap-6">
             <Avatar className="w-20 h-20">
               <AvatarImage 
@@ -58,7 +58,7 @@ export function ProfileSection({ profile, isEditing, onAvatarChange, avatarFile 
               disabled={!isEditing}
             />
           </div>
-        </form>
+        </div>
       </CardContent>
     </Card>
   );
