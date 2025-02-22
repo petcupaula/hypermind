@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Play, ArrowLeft, RefreshCcw, Calendar, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
 interface CallDetailsProps {
   id?: string;
@@ -34,17 +35,7 @@ interface ConversationDetails {
   analysis?: ConversationAnalysis;
 }
 
-interface CallRecord {
-  id: string;
-  scenario_id: string;
-  duration: number;
-  transcript: string | null;
-  recording_url: string | null;
-  created_at: string;
-  elevenlabs_conversation_id: string | null;
-  conversation_details: ConversationDetails | null;
-  conversation_state: string | null;
-  user_id: string | null;
+type CallRecord = Database["public"]["Tables"]["call_history"]["Row"] & {
   scenarios: {
     title: string;
     description: string;
@@ -56,7 +47,7 @@ interface CallRecord {
       company: string;
     };
   };
-}
+};
 
 const CallDetails = ({ id: propId }: CallDetailsProps) => {
   const { id: urlId } = useParams();
@@ -195,6 +186,8 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
     return <div className="text-center py-8">Call not found</div>;
   }
 
+  const conversationDetails = call.conversation_details as ConversationDetails | null;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -249,31 +242,31 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {call.conversation_details?.analysis && (
+          {conversationDetails?.analysis && (
             <div className="space-y-6">
-              {call.conversation_details.analysis.transcript_summary && (
+              {conversationDetails.analysis.transcript_summary && (
                 <div>
                   <h3 className="font-semibold text-lg mb-3">Conversation Summary</h3>
                   <div className="bg-muted/50 rounded-lg p-4 text-sm">
-                    {call.conversation_details.analysis.transcript_summary}
+                    {conversationDetails.analysis.transcript_summary}
                   </div>
                 </div>
               )}
 
-              {call.conversation_details.analysis.evaluation_criteria_results && (
+              {conversationDetails.analysis.evaluation_criteria_results && (
                 <div>
                   <h3 className="font-semibold text-lg mb-3">Evaluation Criteria</h3>
                   <div className="space-y-3">
-                    {renderCriteriaResults(call.conversation_details.analysis.evaluation_criteria_results)}
+                    {renderCriteriaResults(conversationDetails.analysis.evaluation_criteria_results)}
                   </div>
                 </div>
               )}
 
-              {call.conversation_details.analysis.data_collection_results && (
+              {conversationDetails.analysis.data_collection_results && (
                 <div>
                   <h3 className="font-semibold text-lg mb-3">Data Collection Results</h3>
                   <div className="grid gap-3">
-                    {call.conversation_details.analysis.data_collection_results.map((result, index) => (
+                    {conversationDetails.analysis.data_collection_results.map((result, index) => (
                       <div key={index} className="bg-muted/50 rounded-lg p-4">
                         <p className="font-medium mb-1">{result.field}</p>
                         <p className="text-sm">{result.value || 'Not collected'}</p>
