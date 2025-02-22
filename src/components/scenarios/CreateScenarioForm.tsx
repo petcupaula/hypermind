@@ -23,50 +23,105 @@ const DEFAULT_CATEGORIES = [
 
 const VOICE_OPTIONS = [
   { 
-    id: "21m00Tcm4TlvDq8ikWAM", 
-    name: "Rachel",
-    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/21m00Tcm4TlvDq8ikWAM/6edb9076-c3e4-420c-b6ab-11d43fe341c8.mp3"
+    id: "9BWtsMINqrJLrRacOk9x", 
+    name: "Aria",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/9BWtsMINqrJLrRacOk9x/405766b8-1f4e-4d3c-aba1-6f25333823ec.mp3"
   },
   { 
-    id: "AZnzlk1XvdvUeBnXmlld", 
-    name: "Domi",
-    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/AZnzlk1XvdvUeBnXmlld/c803f831-8b55-4b2b-aee3-72b3589e3b0c.mp3"
+    id: "CwhRBWXzGAHq8TQ4Fs17", 
+    name: "Roger",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/CwhRBWXzGAHq8TQ4Fs17/58ee3ff5-f6f2-4628-93b8-e38eb31806b0.mp3"
   },
   { 
     id: "EXAVITQu4vr4xnSDxMaL", 
     name: "Sarah",
-    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/EXAVITQu4vr4xnSDxMaL/4f653e19-4d01-4f41-8d57-04309a850a66.mp3"
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/EXAVITQu4vr4xnSDxMaL/01a3e33c-6e99-4ee7-8543-ff2216a32186.mp3"
   },
   { 
-    id: "ErXwobaYiN019PkySvjV", 
-    name: "Antoni",
-    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/ErXwobaYiN019PkySvjV/2c762d0b-59ae-42b1-ab35-354e6282c99c.mp3"
+    id: "FGY2WhTYpPnrIDTdsKH5", 
+    name: "Laura",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/FGY2WhTYpPnrIDTdsKH5/67341759-ad08-41a5-be6e-de12fe448618.mp3"
   },
   { 
-    id: "MF3mGyEYCl7XYWbV9V6O", 
-    name: "Elli",
-    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/MF3mGyEYCl7XYWbV9V6O/f9fd64c3-5d62-45c1-9a86-8a30a8f64072.mp3"
+    id: "IKne3meq5aSn9XLyUdCD", 
+    name: "Charlie",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/IKne3meq5aSn9XLyUdCD/102de6f2-22ed-43e0-a1f1-111fa75c5481.mp3"
   },
   { 
-    id: "TxGEqnHWrfWFTfGW9XjX", 
-    name: "Josh",
-    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/TxGEqnHWrfWFTfGW9XjX/10b1c323-8e56-4d52-94fd-bdc42e42d572.mp3"
+    id: "JBFqnCBsd6RMkjVDRZzb", 
+    name: "George",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/JBFqnCBsd6RMkjVDRZzb/e6206d1a-0721-4787-aafb-06a6e705cac5.mp3"
   },
   { 
-    id: "VR6AewLTigWG4xSOukaG", 
-    name: "Arnold",
-    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/VR6AewLTigWG4xSOukaG/66e83dc2-6543-4897-9283-e028ac5ae4aa.mp3"
+    id: "N2lVS1w4EtoT3dr4eOWO", 
+    name: "Callum",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/N2lVS1w4EtoT3dr4eOWO/ac833bd8-ffda-4938-9ebc-b0f99ca25481.mp3"
   },
   { 
-    id: "pNInz6obpgDQGcFmaJgB", 
-    name: "Adam",
-    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/pNInz6obpgDQGcFmaJgB/e0b45450-78db-49b9-aaa4-d5358a6871bd.mp3"
+    id: "SAz9YHcvj6GT2YYXdXww", 
+    name: "River",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/SAz9YHcvj6GT2YYXdXww/e6c95f0b-2227-491a-b3d7-2249240decb7.mp3"
   },
   { 
-    id: "yoZ06aMxZJJ28mfd3POQ", 
-    name: "Sam",
-    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/yoZ06aMxZJJ28mfd3POQ/af3f1b06-ec9e-4592-9e3c-0fbb41925529.mp3"
+    id: "TX3LPaxmHKxFdv7VOQHJ", 
+    name: "Liam",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/TX3LPaxmHKxFdv7VOQHJ/63148076-6363-42db-aea8-31424308b92c.mp3"
   },
+  { 
+    id: "XB0fDUnXU5powFXDhCwa", 
+    name: "Charlotte",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/XB0fDUnXU5powFXDhCwa/942356dc-f10d-4d89-bda5-4f8505ee038b.mp3"
+  },
+  { 
+    id: "Xb7hH8MSUJpSbSDYk0k2", 
+    name: "Alice",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/Xb7hH8MSUJpSbSDYk0k2/d10f7534-11f6-41fe-a012-2de1e482d336.mp3"
+  },
+  { 
+    id: "XrExE9yKIg1WjnnlVkGX", 
+    name: "Matilda",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/XrExE9yKIg1WjnnlVkGX/b930e18d-6b4d-466e-bab2-0ae97c6d8535.mp3"
+  },
+  { 
+    id: "bIHbv24MWmeRgasZH58o", 
+    name: "Will",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/bIHbv24MWmeRgasZH58o/8caf8f3d-ad29-4980-af41-53f20c72d7a4.mp3"
+  },
+  { 
+    id: "cgSgspJ2msm6clMCkdW9", 
+    name: "Jessica",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/cgSgspJ2msm6clMCkdW9/56a97bf8-b69b-448f-846c-c3a11683d45a.mp3"
+  },
+  { 
+    id: "cjVigY5qzO86Huf0OWal", 
+    name: "Eric",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/cjVigY5qzO86Huf0OWal/d098fda0-6456-4030-b3d8-63aa048c9070.mp3"
+  },
+  { 
+    id: "iP95p4xoKVk53GoZ742B", 
+    name: "Chris",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/iP95p4xoKVk53GoZ742B/3f4bde72-cc48-40dd-829f-57fbf906f4d7.mp3"
+  },
+  { 
+    id: "nPczCjzI2devNBz1zQrb", 
+    name: "Brian",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/nPczCjzI2devNBz1zQrb/2dd3e72c-4fd3-42f1-93ea-abc5d4e5aa1d.mp3"
+  },
+  { 
+    id: "onwK4e9ZLuTAKqWW03F9", 
+    name: "Daniel",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/onwK4e9ZLuTAKqWW03F9/7eee0236-1a72-4b86-b303-5dcadc007ba9.mp3"
+  },
+  { 
+    id: "pFZP5JQG7iQjIQuC4Bku", 
+    name: "Lily",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/pFZP5JQG7iQjIQuC4Bku/89b68b35-b3dd-4348-a84a-a3c13a3c2b30.mp3"
+  },
+  { 
+    id: "pqHfZKP75CvOlQylNhV4", 
+    name: "Bill",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/pqHfZKP75CvOlQylNhV4/d782b3ff-84ba-4029-848c-acf01285524d.mp3"
+  }
 ] as const;
 
 type VoiceId = typeof VOICE_OPTIONS[number]["id"];
