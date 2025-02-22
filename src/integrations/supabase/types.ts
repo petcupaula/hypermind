@@ -16,6 +16,7 @@ export type Database = {
           data_collection_results: Json | null
           duration: number
           elevenlabs_conversation_id: string | null
+          elevenlabs_recording_url: string | null
           evaluation_criteria_results: Json | null
           id: string
           recording_url: string | null
@@ -30,6 +31,7 @@ export type Database = {
           data_collection_results?: Json | null
           duration: number
           elevenlabs_conversation_id?: string | null
+          elevenlabs_recording_url?: string | null
           evaluation_criteria_results?: Json | null
           id?: string
           recording_url?: string | null
@@ -44,6 +46,7 @@ export type Database = {
           data_collection_results?: Json | null
           duration?: number
           elevenlabs_conversation_id?: string | null
+          elevenlabs_recording_url?: string | null
           evaluation_criteria_results?: Json | null
           id?: string
           recording_url?: string | null

@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -100,43 +99,83 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
         throw new Error('Failed to fetch ElevenLabs API key');
       }
 
-      console.log('Making ElevenLabs API call with API key present:', !!apiKeyData.secret);
+      console.log('Making ElevenLabs API calls with API key present:', !!apiKeyData.secret);
 
-      const response = await fetch(`https://api.elevenlabs.io/v1/convai/conversations/${call.elevenlabs_conversation_id}`, {
+      // Fetch conversation details
+      const conversationResponse = await fetch(`https://api.elevenlabs.io/v1/convai/conversations/${call.elevenlabs_conversation_id}`, {
         headers: {
           'xi-api-key': apiKeyData.secret,
         },
       });
 
-      if (!response.ok) {
-        if (response.status === 401) {
+      if (!conversationResponse.ok) {
+        if (conversationResponse.status === 401) {
           throw new Error('Invalid or missing ElevenLabs API key');
         }
-        throw new Error(`Failed to fetch ElevenLabs conversation details: ${response.status}`);
+        throw new Error(`Failed to fetch ElevenLabs conversation details: ${conversationResponse.status}`);
       }
 
-      const data = await response.json();
-      const analysis = data.analysis || {};
+      const conversationData = await conversationResponse.json();
+      
+      // Fetch audio recording
+      console.log('Fetching ElevenLabs audio recording...');
+      const audioResponse = await fetch(`https://api.elevenlabs.io/v1/convai/conversations/${call.elevenlabs_conversation_id}/audio`, {
+        headers: {
+          'xi-api-key': apiKeyData.secret,
+        },
+      });
 
+      if (!audioResponse.ok) {
+        console.error('Failed to fetch audio:', audioResponse.status);
+        throw new Error(`Failed to fetch ElevenLabs audio: ${audioResponse.status}`);
+      }
+
+      const audioBlob = await audioResponse.blob();
+      console.log('Audio blob size:', audioBlob.size);
+
+      // Upload audio to Supabase storage
+      const fileName = `elevenlabs-recording-${call.elevenlabs_conversation_id}.mp3`;
+      const filePath = `${sessionData.session.user.id}/${fileName}`;
+
+      console.log('Uploading audio to Supabase storage...');
+      const { error: uploadError } = await supabase.storage
+        .from('call-recordings')
+        .upload(filePath, audioBlob, {
+          contentType: 'audio/mpeg',
+          upsert: true
+        });
+
+      if (uploadError) {
+        console.error('Error uploading audio:', uploadError);
+        throw uploadError;
+      }
+
+      // Get the public URL for the uploaded audio
+      const { data: { publicUrl } } = supabase.storage
+        .from('call-recordings')
+        .getPublicUrl(filePath);
+
+      // Update the call history record
       const { error: updateError } = await supabase
         .from('call_history')
         .update({
-          transcript_summary: analysis.transcript_summary || null,
-          evaluation_criteria_results: analysis.evaluation_criteria_results || null,
-          data_collection_results: analysis.data_collection_results || null,
-          call_successful: data.state === 'completed'
+          transcript_summary: conversationData.analysis?.transcript_summary || null,
+          evaluation_criteria_results: conversationData.analysis?.evaluation_criteria_results || null,
+          data_collection_results: conversationData.analysis?.data_collection_results || null,
+          call_successful: conversationData.state === 'completed',
+          elevenlabs_recording_url: publicUrl
         })
         .eq('id', id);
 
       if (updateError) throw updateError;
 
-      return data;
+      return conversationData;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['call-details', id] });
       toast({
         title: "Success",
-        description: "Conversation details updated successfully",
+        description: "Conversation details and recording updated successfully",
       });
     },
     onError: (error) => {
@@ -308,17 +347,31 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
             </div>
           )}
 
-          {call.recording_url && (
+          {(call.recording_url || call.elevenlabs_recording_url) && (
             <div>
-              <h3 className="font-semibold text-lg mb-3">Recording</h3>
-              <Button
-                variant="secondary"
-                onClick={() => playAudio(call.recording_url!)}
-                className="gap-2"
-              >
-                <Play className="h-4 w-4" />
-                Play Recording
-              </Button>
+              <h3 className="font-semibold text-lg mb-3">Recordings</h3>
+              <div className="space-y-3">
+                {call.recording_url && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => playAudio(call.recording_url!)}
+                    className="gap-2"
+                  >
+                    <Play className="h-4 w-4" />
+                    Play Local Recording
+                  </Button>
+                )}
+                {call.elevenlabs_recording_url && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => playAudio(call.elevenlabs_recording_url!)}
+                    className="gap-2"
+                  >
+                    <Play className="h-4 w-4" />
+                    Play ElevenLabs Recording
+                  </Button>
+                )}
+              </div>
             </div>
           )}
         </CardContent>
