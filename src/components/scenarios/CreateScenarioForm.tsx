@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -21,6 +20,18 @@ const DEFAULT_CATEGORIES = [
   "Closing Deals",
 ] as const;
 
+const VOICE_OPTIONS = [
+  { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel" },
+  { id: "AZnzlk1XvdvUeBnXmlld", name: "Domi" },
+  { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah" },
+  { id: "ErXwobaYiN019PkySvjV", name: "Antoni" },
+  { id: "MF3mGyEYCl7XYWbV9V6O", name: "Elli" },
+  { id: "TxGEqnHWrfWFTfGW9XjX", name: "Josh" },
+  { id: "VR6AewLTigWG4xSOukaG", name: "Arnold" },
+  { id: "pNInz6obpgDQGcFmaJgB", name: "Adam" },
+  { id: "yoZ06aMxZJJ28mfd3POQ", name: "Sam" },
+] as const;
+
 type Category = typeof DEFAULT_CATEGORIES[number] | string;
 
 const CreateScenarioForm = () => {
@@ -39,14 +50,13 @@ const CreateScenarioForm = () => {
       company: "",
       prompt: "",
       firstMessage: "",
-      voiceId: "21m00Tcm4TlvDq8ikWAM",
+      voiceId: VOICE_OPTIONS[0].id,
       appearance: "",
       background: "",
       personality: "",
     },
   });
 
-  // Fetch existing categories from scenarios table
   const { data: existingCategories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
@@ -92,7 +102,6 @@ const CreateScenarioForm = () => {
 
       if (personaError) throw personaError;
 
-      // Generate avatar for the new persona
       try {
         const { data: avatarData, error: avatarError } = await supabase.functions
           .invoke('generate-avatar', {
@@ -102,7 +111,6 @@ const CreateScenarioForm = () => {
         if (avatarError) {
           console.error('Error generating avatar:', avatarError);
         } else if (avatarData?.imageUrl) {
-          // Update the persona with the avatar URL
           const { error: updateError } = await supabase
             .from('personas')
             .update({ avatar_url: avatarData.imageUrl })
@@ -330,6 +338,25 @@ const CreateScenarioForm = () => {
                   placeholder="Friendly and knowledgeable"
                   required
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="personaVoice">Voice</Label>
+                <select
+                  id="personaVoice"
+                  className="w-full rounded-md border border-input bg-background px-3 py-2"
+                  value={formData.persona.voiceId}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    persona: { ...prev.persona, voiceId: e.target.value }
+                  }))}
+                >
+                  {VOICE_OPTIONS.map((voice) => (
+                    <option key={voice.id} value={voice.id}>
+                      {voice.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
