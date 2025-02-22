@@ -6,6 +6,7 @@ import AnimatedGradient from "@/components/ui/animated-gradient";
 import Navigation from "@/components/layout/Navigation";
 import ChatInterface from "@/components/chat/ChatInterface";
 import ScenarioCard, { Scenario } from "@/components/scenarios/ScenarioCard";
+import GenerateAvatars from "@/components/scenarios/GenerateAvatars";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -53,7 +54,8 @@ const Dashboard = () => {
           voiceId: scenario.persona.voice_id,
           name: scenario.persona.name,
           role: scenario.persona.role,
-          company: scenario.persona.company
+          company: scenario.persona.company,
+          avatarUrl: scenario.persona.avatar_url
         }
       }));
     }
@@ -130,9 +132,10 @@ const Dashboard = () => {
               <h1 className="text-4xl font-bold tracking-tight mb-4">
                 Sales Training Scenarios
               </h1>
-              <p className="text-xl text-gray-600">
+              <p className="text-xl text-gray-600 mb-8">
                 Choose a scenario to practice your sales skills with different customer personas
               </p>
+              <GenerateAvatars />
             </div>
 
             <div className="grid grid-cols-12 gap-8">
