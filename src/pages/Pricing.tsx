@@ -3,9 +3,22 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import Navigation from "@/components/layout/Navigation";
+import { useState } from "react";
 
 const Pricing = () => {
   const navigate = useNavigate();
+  const [isAnnual, setIsAnnual] = useState(true);
+
+  const prices = {
+    starter: {
+      monthly: 49,
+      annual: 39,
+    },
+    professional: {
+      monthly: 99,
+      annual: 79,
+    },
+  };
 
   return (
     <div className="min-h-screen">
@@ -26,10 +39,26 @@ const Pricing = () => {
             </p>
             <div className="inline-block rounded-full bg-white/50 backdrop-blur-sm border border-gray-200 p-1">
               <div className="flex items-center gap-2">
-                <span className="px-4 py-2 text-sm">Monthly</span>
-                <div className="bg-primary text-white px-4 py-2 rounded-full text-sm">
+                <button
+                  className={`px-4 py-2 text-sm rounded-full transition-colors ${
+                    !isAnnual
+                      ? "bg-primary text-white"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
+                  onClick={() => setIsAnnual(false)}
+                >
+                  Monthly
+                </button>
+                <button
+                  className={`px-4 py-2 text-sm rounded-full transition-colors ${
+                    isAnnual
+                      ? "bg-primary text-white"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
+                  onClick={() => setIsAnnual(true)}
+                >
                   Annual (Save 20%)
-                </div>
+                </button>
               </div>
             </div>
           </div>
@@ -43,8 +72,9 @@ const Pricing = () => {
             <div className="bg-white/50 backdrop-blur-lg p-6 rounded-2xl border border-gray-200">
               <h3 className="text-xl font-semibold mb-2">Starter</h3>
               <div className="mb-4">
-                <span className="text-3xl font-bold">$49</span>
+                <span className="text-3xl font-bold">${isAnnual ? prices.starter.annual : prices.starter.monthly}</span>
                 <span className="text-gray-600">/month</span>
+                {isAnnual && <p className="text-sm text-gray-500">billed annually</p>}
               </div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center gap-2">
@@ -75,8 +105,9 @@ const Pricing = () => {
               </div>
               <h3 className="text-xl font-semibold mb-2">Professional</h3>
               <div className="mb-4">
-                <span className="text-3xl font-bold">$99</span>
+                <span className="text-3xl font-bold">${isAnnual ? prices.professional.annual : prices.professional.monthly}</span>
                 <span className="text-gray-600">/month</span>
+                {isAnnual && <p className="text-sm text-gray-500">billed annually</p>}
               </div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center gap-2">
