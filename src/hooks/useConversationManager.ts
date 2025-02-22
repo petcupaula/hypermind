@@ -1,4 +1,3 @@
-
 import { useState, useRef } from 'react';
 import { useConversation } from "@11labs/react";
 import { useToast } from "@/components/ui/use-toast";
@@ -18,6 +17,54 @@ export const useConversationManager = (scenario: Scenario) => {
   const audioChunksRef = useRef<Blob[]>([]);
   const transcriptMessagesRef = useRef<string[]>([]);
   const currentCallRef = useRef<{ id: string } | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const destinationRef = useRef<MediaStreamAudioDestinationNode | null>(null);
+
+  const setupAudioCapture = async (stream: MediaStream) => {
+    try {
+      audioContextRef.current = new AudioContext();
+      destinationRef.current = audioContextRef.current.createMediaStreamDestination();
+
+      const micSource = audioContextRef.current.createMediaStreamSource(stream);
+      micSource.connect(destinationRef.current);
+
+      const audioElement = new Audio();
+      audioElement.autoplay = true;
+      
+      audioElement.addEventListener('play', () => {
+        if (audioContextRef.current && destinationRef.current) {
+          const aiSource = audioContextRef.current.createMediaElementSource(audioElement);
+          aiSource.connect(destinationRef.current);
+          aiSource.connect(audioContextRef.current.destination);
+        }
+      });
+
+      const combinedStream = destinationRef.current.stream;
+      const mediaRecorder = new MediaRecorder(combinedStream);
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.start();
+      mediaRecorderRef.current = mediaRecorder;
+
+      return audioElement;
+    } catch (error) {
+      console.error('Error setting up audio capture:', error);
+      throw error;
+    }
+  };
+
+  const cleanupAudio = () => {
+    if (audioContextRef.current?.state !== 'closed') {
+      audioContextRef.current?.close();
+    }
+    audioContextRef.current = null;
+    destinationRef.current = null;
+  };
 
   const saveCallHistory = async () => {
     if (!duration) {
@@ -134,6 +181,7 @@ export const useConversationManager = (scenario: Scenario) => {
       if (isConnected) {
         setIsConnected(false);
         setLastCallDuration(duration);
+        cleanupAudio();
         saveCallHistory();
         toast({
           title: "Disconnected",
@@ -176,6 +224,7 @@ export const useConversationManager = (scenario: Scenario) => {
       },
       tts: {
         voiceId: scenario.persona.voiceId,
+        audioElement: null,
       },
     },
   });
@@ -193,6 +242,8 @@ export const useConversationManager = (scenario: Scenario) => {
         }
       });
       console.log("Microphone access granted", stream.active);
+
+      const audioElement = await setupAudioCapture(stream);
       
       console.log("Initiating ElevenLabs session...");
       const conversationId = await conversation.startSession({
@@ -201,6 +252,7 @@ export const useConversationManager = (scenario: Scenario) => {
           reconnect: true,
           maxRetries: 3,
         },
+        audioElement,
       });
       
       console.log("Conversation started with ID:", conversationId);
@@ -209,6 +261,7 @@ export const useConversationManager = (scenario: Scenario) => {
       
     } catch (error) {
       console.error("Error starting conversation:", error);
+      cleanupAudio();
       toast({
         title: "Error",
         description: "Failed to start voice chat. Please ensure microphone access is allowed.",
@@ -230,6 +283,7 @@ export const useConversationManager = (scenario: Scenario) => {
           await new Promise(resolve => setTimeout(resolve, 500));
         }
         
+        cleanupAudio();
         await saveCallHistory();
         
         conversationRef.current.endSession();
