@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, Bot, Volume2, VolumeX } from "lucide-react";
-import { AudioRecorder } from "@/utils/audio";
+import { AudioRecorder, AudioQueue, encodeAudioData } from "@/utils/audio";
 
 const ChatInterface = () => {
   const [isConnected, setIsConnected] = useState(false);
