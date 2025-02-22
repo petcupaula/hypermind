@@ -21,6 +21,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const transcriptMessagesRef = useRef<string[]>([]);
 
   const transformImageUrl = (url: string) => {
     if (!url) return url;
@@ -38,6 +39,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
     onConnect: () => {
       console.log("Connected to ElevenLabs - Setting up session...");
       setIsConnected(true);
+      transcriptMessagesRef.current = [];
       toast({
         title: "Connected",
         description: "Voice chat is now active",
@@ -64,6 +66,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
         console.log("Agent finished speaking");
         setIsSpeaking(false);
       } else if (message.type === 'transcript') {
+        transcriptMessagesRef.current.push(message.text);
         setCurrentTranscript(prev => prev + "\n" + message.text);
       }
     },
@@ -104,13 +107,15 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
 
       console.log('Starting call history save with duration:', duration);
       console.log('Audio chunks:', audioChunksRef.current.length);
-      console.log('Scenario:', scenario);
+      console.log('Transcript messages:', transcriptMessagesRef.current.length);
+
+      const fullTranscript = transcriptMessagesRef.current.join('\n');
 
       const { error: insertError } = await supabase.from('call_history').insert({
         user_id: sessionData.session.user.id,
         scenario_id: scenario.id,
         duration,
-        transcript: currentTranscript || null,
+        transcript: fullTranscript || null,
       });
 
       if (insertError) {
