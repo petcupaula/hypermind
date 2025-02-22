@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, ArrowLeft, RefreshCcw, Calendar, Clock } from "lucide-react";
+import { Play, ArrowLeft, RefreshCcw, Calendar, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -157,6 +157,22 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
     return <div className="text-center py-8">Call not found</div>;
   }
 
+  const renderCriteriaResults = (results: any[]) => {
+    return results.map((result, index) => (
+      <div key={index} className="flex items-start gap-2 p-3 bg-muted/30 rounded-md">
+        {result.passed ? (
+          <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+        ) : (
+          <XCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+        )}
+        <div>
+          <p className="font-medium">{result.criterion}</p>
+          <p className="text-sm text-muted-foreground">{result.explanation}</p>
+        </div>
+      </div>
+    ));
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -211,6 +227,42 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
+          {call.conversation_details?.analysis && (
+            <div className="space-y-6">
+              {call.conversation_details.analysis.transcript_summary && (
+                <div>
+                  <h3 className="font-semibold text-lg mb-3">Conversation Summary</h3>
+                  <div className="bg-muted/50 rounded-lg p-4 text-sm">
+                    {call.conversation_details.analysis.transcript_summary}
+                  </div>
+                </div>
+              )}
+
+              {call.conversation_details.analysis.evaluation_criteria_results && (
+                <div>
+                  <h3 className="font-semibold text-lg mb-3">Evaluation Criteria</h3>
+                  <div className="space-y-3">
+                    {renderCriteriaResults(call.conversation_details.analysis.evaluation_criteria_results)}
+                  </div>
+                </div>
+              )}
+
+              {call.conversation_details.analysis.data_collection_results && (
+                <div>
+                  <h3 className="font-semibold text-lg mb-3">Data Collection Results</h3>
+                  <div className="grid gap-3">
+                    {call.conversation_details.analysis.data_collection_results.map((result: any, index: number) => (
+                      <div key={index} className="bg-muted/50 rounded-lg p-4">
+                        <p className="font-medium mb-1">{result.field}</p>
+                        <p className="text-sm">{result.value || 'Not collected'}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {call.transcript && (
             <div>
               <h3 className="font-semibold text-lg mb-3">Transcript</h3>
@@ -231,21 +283,6 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
                 <Play className="h-4 w-4" />
                 Play Recording
               </Button>
-            </div>
-          )}
-
-          {call.conversation_details && (
-            <div>
-              <h3 className="font-semibold text-lg mb-3">Conversation Details</h3>
-              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                <p>
-                  <span className="font-medium">Status:</span> {call.conversation_state}
-                </p>
-                <p>
-                  <span className="font-medium">Conversation ID:</span> {call.elevenlabs_conversation_id}
-                </p>
-                {/* Add more conversation details as needed */}
-              </div>
             </div>
           )}
         </CardContent>
