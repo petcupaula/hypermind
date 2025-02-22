@@ -7,6 +7,7 @@ import { Play, Calendar, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import CallDetails from "./CallDetails";
 
 interface CallRecord {
   id: string;
@@ -15,6 +16,9 @@ interface CallRecord {
   transcript: string | null;
   recording_url: string | null;
   created_at: string;
+  elevenlabs_conversation_id: string | null;
+  conversation_details: any | null;
+  conversation_state: string | null;
   scenarios: {
     title: string;
     description: string;
@@ -29,6 +33,7 @@ interface CallRecord {
 }
 
 const CallHistory = () => {
+  const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -96,6 +101,10 @@ const CallHistory = () => {
     }
   };
 
+  if (selectedCallId) {
+    return <CallDetails id={selectedCallId} />;
+  }
+
   if (isLoading) {
     return <div className="text-center py-8">Loading call history...</div>;
   }
@@ -113,7 +122,11 @@ const CallHistory = () => {
   return (
     <div className="space-y-4">
       {calls.map((call) => (
-        <Card key={call.id} className="bg-card/50 backdrop-blur">
+        <Card 
+          key={call.id} 
+          className="bg-card/50 backdrop-blur hover:bg-card/70 transition-colors cursor-pointer"
+          onClick={() => setSelectedCallId(call.id)}
+        >
           <CardHeader>
             <div className="flex items-start justify-between">
               <div>
@@ -147,20 +160,15 @@ const CallHistory = () => {
             </div>
           </CardHeader>
           <CardContent>
-            {call.transcript && (
-              <div className="mb-4">
-                <div className="font-medium mb-2">Transcript</div>
-                <div className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {call.transcript}
-                </div>
-              </div>
-            )}
             {call.recording_url && (
               <Button
                 variant="secondary"
                 size="sm"
                 className="gap-2"
-                onClick={() => playAudio(call.recording_url!, call.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  playAudio(call.recording_url!, call.id);
+                }}
                 disabled={playingAudioId === call.id}
               >
                 <Play className="h-4 w-4" />
