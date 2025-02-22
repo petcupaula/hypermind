@@ -170,18 +170,16 @@ const CreateScenarioForm = () => {
     try {
       setIsPlaying(true);
       
-      const apiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
-      console.log("API Key exists:", !!apiKey); // Debug log
+      const { data: { secret: apiKey }, error: secretError } = await supabase
+        .rpc('get_secret', { secret_name: 'VITE_ELEVENLABS_API_KEY' });
       
-      if (!apiKey) {
+      if (secretError || !apiKey) {
         throw new Error("ElevenLabs API key not found. Please make sure you've added your API key in the project settings.");
       }
 
       if (!formData.persona.voiceId) {
         throw new Error("No voice ID selected");
       }
-
-      console.log("Making request to ElevenLabs API..."); // Debug log
 
       const response = await fetch("https://api.elevenlabs.io/v1/text-to-speech/" + formData.persona.voiceId, {
         method: "POST",
