@@ -4,14 +4,14 @@ import { Scenario } from "@/components/scenarios/ScenarioCard";
 
 const demoScenario: Scenario = {
   id: "demo",
-  title: "Demo Conversation",
-  description: "Try out a sample conversation with our AI assistant",
-  category: "Demo",
-  difficulty: "Beginner",
+  title: "Cold Call to CTO",
+  description: "Practice a cold call to a Chief Technology Officer about a new software solution",
+  category: "Cold Calling",
+  difficulty: "Intermediate",
   persona: {
-    prompt: "You are a friendly sales assistant helping users understand how the platform works. Keep responses brief and engaging.",
-    firstMessage: "Hi there! I'm here to show you how our conversational AI training works. Would you like to try it out?",
-    voiceId: "pqHfZKP75CvOlQylNhV4"
+    prompt: "You are Mark Chen, a seasoned CTO at a growing tech company. You're busy but willing to listen if the value proposition is clear. You're technically knowledgeable and care about scalability, security, and ROI. Be direct but professional, and don't hesitate to ask challenging questions about technical specifications and implementation details.",
+    firstMessage: "Hello, this is Mark Chen speaking. I'm in between meetings, how can I help you?",
+    voiceId: "JBFqnCBsd6RMkjVDRZzb" // Using George's voice which sounds professional and authoritative
   }
 };
 
@@ -25,3 +25,4 @@ const DemoSection = () => {
 };
 
 export default DemoSection;
+
