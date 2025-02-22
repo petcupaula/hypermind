@@ -13,8 +13,10 @@ interface ChatInterfaceProps {
 const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [duration, setDuration] = useState(0);
   const { toast } = useToast();
   const conversationRef = useRef(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize ElevenLabs conversation
   const conversation = useConversation({
@@ -68,6 +70,35 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
       },
     },
   });
+
+  // Format duration into MM:SS
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  useEffect(() => {
+    if (isConnected) {
+      // Start the timer when connected
+      timerRef.current = setInterval(() => {
+        setDuration(prev => prev + 1);
+      }, 1000);
+    } else {
+      // Clear the timer and reset duration when disconnected
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      setDuration(0);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [isConnected]);
 
   const startConversation = async () => {
     try {
@@ -132,7 +163,14 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
             <Bot className="h-5 w-5 text-primary" />
           </div>
           <div className="flex-1">
-            <h3 className="font-medium">{scenario.title}</h3>
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="font-medium">{scenario.title}</h3>
+              {isConnected && (
+                <span className="text-sm font-medium text-primary">
+                  {formatDuration(duration)}
+                </span>
+              )}
+            </div>
             <p className="text-sm text-gray-500 mb-2">{scenario.description}</p>
             {scenario.persona.name && (
               <div className="flex items-center gap-2 mt-2">
