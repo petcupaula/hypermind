@@ -29,15 +29,20 @@ const ScenarioCard = ({ scenario, onStart }: ScenarioCardProps) => {
   return (
     <Card className="p-6 hover:shadow-lg transition-shadow">
       <div className="flex items-start gap-4">
-        <div className="bg-primary/10 p-3 rounded-lg">
+        <div className="bg-primary/10 p-3 rounded-lg w-[74px] h-[74px] flex items-center justify-center">
           {scenario.persona.avatarUrl ? (
             <img
               src={scenario.persona.avatarUrl}
               alt={scenario.persona.name || "Persona avatar"}
               className="w-12 h-12 rounded-lg object-cover"
+              onError={(e) => {
+                // Fallback to Bot icon if image fails to load
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement?.querySelector('.fallback-icon')?.removeAttribute('style');
+              }}
             />
           ) : (
-            <Bot className="h-6 w-6 text-primary" />
+            <Bot className="h-6 w-6 text-primary fallback-icon" />
           )}
         </div>
         <div className="flex-1">

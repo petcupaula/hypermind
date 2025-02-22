@@ -163,15 +163,20 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
     <div className="w-full max-w-3xl mx-auto bg-white/50 backdrop-blur-lg rounded-2xl border border-gray-200 shadow-lg">
       <div className="border-b p-4">
         <div className="flex items-center gap-4">
-          <div className="bg-primary/10 p-3 rounded-lg">
+          <div className="bg-primary/10 p-3 rounded-lg w-[74px] h-[74px] flex items-center justify-center">
             {scenario.persona.avatarUrl ? (
               <img
                 src={scenario.persona.avatarUrl}
                 alt={scenario.persona.name || "Persona avatar"}
                 className="w-12 h-12 rounded-lg object-cover"
+                onError={(e) => {
+                  // Fallback to Bot icon if image fails to load
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement?.querySelector('.fallback-icon')?.removeAttribute('style');
+                }}
               />
             ) : (
-              <Bot className="h-5 w-5 text-primary" />
+              <Bot className="h-6 w-6 text-primary fallback-icon" />
             )}
           </div>
           <div className="flex-1">
