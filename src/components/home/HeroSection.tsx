@@ -1,8 +1,11 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="max-w-4xl mx-auto text-center mb-16 animate-fade-up">
       <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
@@ -16,7 +19,11 @@ const HeroSection = () => {
         Ramp your sales reps 10x faster with personalized AI training. Create custom scenarios, practice difficult conversations, and master your pitch in days, not months.
       </p>
       <div className="flex items-center justify-center gap-4">
-        <Button size="lg" className="gap-2">
+        <Button 
+          size="lg" 
+          className="gap-2"
+          onClick={() => navigate("/dashboard")}
+        >
           Start Training Now
           <ArrowRight className="h-4 w-4" />
         </Button>
