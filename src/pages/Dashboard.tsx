@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AnimatedGradient from "@/components/ui/animated-gradient";
@@ -78,13 +79,7 @@ const Dashboard = () => {
             >
               ← Back to scenarios
             </Button>
-            <ChatInterface 
-              agent={{
-                prompt: selectedScenario.persona.prompt,
-                firstMessage: selectedScenario.persona.firstMessage,
-                voiceId: selectedScenario.persona.voiceId
-              }}
-            />
+            <ChatInterface />
           </div>
         ) : (
           <div className="max-w-4xl mx-auto">
