@@ -11,7 +11,7 @@ const ChatInterface = () => {
 
   // Initialize ElevenLabs conversation
   const conversation = useConversation({
-    apiKey: process.env.ELEVENLABS_API_KEY,
+    apiKey: import.meta.env.VITE_ELEVENLABS_API_KEY,
     voiceId: "CwhRBWXzGAHq8TQ4Fs17", // Using Roger voice
     model: "eleven_turbo_v2",
   });
