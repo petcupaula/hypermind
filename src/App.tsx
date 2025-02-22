@@ -1,3 +1,6 @@
+
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
 import Features from "@/pages/Features";
@@ -6,8 +9,16 @@ import Enterprise from "@/pages/Enterprise";
 import Scenarios from "@/pages/Scenarios";
 import NotFound from "@/pages/NotFound";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import CallDetailsPage from "@/pages/CallDetails";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
 const router = createBrowserRouter([
   {
@@ -53,7 +64,11 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  );
 }
 
 export default App;
