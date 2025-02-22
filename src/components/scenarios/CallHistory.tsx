@@ -20,6 +20,11 @@ interface CallRecord {
     description: string;
     category: string;
     difficulty: string;
+    persona: {
+      name: string;
+      role: string;
+      company: string;
+    };
   };
 }
 
@@ -44,7 +49,12 @@ const CallHistory = () => {
             title,
             description,
             category,
-            difficulty
+            difficulty,
+            persona:personas (
+              name,
+              role,
+              company
+            )
           )
         `)
         .eq('user_id', sessionData.session.user.id)
@@ -108,8 +118,18 @@ const CallHistory = () => {
             <div className="flex items-start justify-between">
               <div>
                 <CardTitle className="text-lg">{call.scenarios.title}</CardTitle>
-                <CardDescription className="mt-1.5">
-                  {call.scenarios.description}
+                <CardDescription className="mt-1.5 space-y-1">
+                  <p>{call.scenarios.description}</p>
+                  <p className="text-sm font-medium text-primary">
+                    {call.scenarios.persona.name} • {call.scenarios.persona.role} at {call.scenarios.persona.company}
+                  </p>
+                  <span className={`inline-block text-xs px-2 py-1 rounded-full ${
+                    call.scenarios.difficulty === "Beginner" ? "bg-green-100 text-green-700" :
+                    call.scenarios.difficulty === "Intermediate" ? "bg-yellow-100 text-yellow-700" :
+                    "bg-red-100 text-red-700"
+                  }`}>
+                    {call.scenarios.difficulty}
+                  </span>
                 </CardDescription>
               </div>
               <div className="text-sm text-muted-foreground space-y-1">
