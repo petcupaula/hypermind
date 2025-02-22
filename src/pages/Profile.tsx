@@ -93,6 +93,7 @@ const Profile = () => {
       name: formData.get("name") as string,
       company: formData.get("company") as string,
       role: formData.get("role") as string,
+      product_name: formData.get("product_name") as string,
       industry: form.querySelector('#industry')?.getAttribute('data-value') || profile?.industry,
       target_market: form.querySelector('#target_market')?.getAttribute('data-value') || profile?.target_market,
       description: formData.get("description") as string,

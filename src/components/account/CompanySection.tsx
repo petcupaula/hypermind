@@ -63,6 +63,17 @@ export function CompanySection({ profile, isEditing }: CompanySectionProps) {
           </div>
 
           <div className="grid gap-2">
+            <Label htmlFor="product_name">Product Name</Label>
+            <Input
+              id="product_name"
+              name="product_name"
+              defaultValue={profile?.product_name || ""}
+              disabled={!isEditing}
+              placeholder="E.g., SalesAI Pro"
+            />
+          </div>
+
+          <div className="grid gap-2">
             <Label htmlFor="industry">Industry</Label>
             <Select 
               disabled={!isEditing}
