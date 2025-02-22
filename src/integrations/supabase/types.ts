@@ -12,6 +12,7 @@ export type Database = {
       personas: {
         Row: {
           appearance: string
+          avatar_url: string | null
           background: string
           company: string
           created_at: string
@@ -26,6 +27,7 @@ export type Database = {
         }
         Insert: {
           appearance: string
+          avatar_url?: string | null
           background: string
           company: string
           created_at?: string
@@ -40,6 +42,7 @@ export type Database = {
         }
         Update: {
           appearance?: string
+          avatar_url?: string | null
           background?: string
           company?: string
           created_at?: string
