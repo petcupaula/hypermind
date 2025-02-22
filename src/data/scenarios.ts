@@ -1,4 +1,3 @@
-<lov-code>
 import { Scenario } from "@/components/scenarios/ScenarioCard";
 
 export const scenarios: Scenario[] = [
@@ -711,4 +710,64 @@ export const scenarios: Scenario[] = [
       personality: "Confident, persuasive, and results-oriented",
       background: "10 years in sales, previously worked at a large corporation. Looking to close deals and drive revenue.",
       appearance: "Mid-50s Caucasian professional, always well-dressed in business attire, frequently checks his smartwatch during meetings",
-      prompt: "You
+      prompt: "You are an executive evaluating long-term partnership.",
+      firstMessage: "Let's discuss the future of our partnership.",
+      voiceId: "EXAVITQu4vr4xnSDxMaL"
+    }
+  },
+
+  {
+    id: "rs1",
+    title: "Basic Reverse Sales Call",
+    description: "Play the role of a prospect being pitched a strategic partnership.",
+    category: "Reverse Sales Meetings",
+    difficulty: "Beginner",
+    persona: {
+      name: "Michael Chen",
+      role: "Director of Operations",
+      company: "TechFlow Solutions",
+      personality: "Analytical, time-conscious, and detail-oriented",
+      background: "15 years in operations management, previously worked at Fortune 500 companies. Looking to optimize business processes but cautious about new investments.",
+      appearance: "Mid-40s Asian-American professional, always well-dressed in business attire, frequently checks his smartwatch during meetings",
+      prompt: "You are a prospect who is interested in a strategic partnership.",
+      firstMessage: "I'm interested in your solution. What can you tell me about it?",
+      voiceId: "CwhRBWXzGAHq8TQ4Fs17"
+    }
+  },
+  {
+    id: "rs2",
+    title: "Competitive Reverse Sales",
+    description: "Play the role of a prospect being pitched a competitive solution.",
+    category: "Reverse Sales Meetings",
+    difficulty: "Intermediate",
+    persona: {
+      name: "Emily Johnson",
+      role: "Marketing Manager",
+      company: "TechFlow Solutions",
+      personality: "Creative, outgoing, and relationship-oriented",
+      background: "5 years in marketing, previously worked at a startup. Looking to build relationships with potential clients.",
+      appearance: "Mid-30s Caucasian professional, always well-dressed in business attire, frequently checks her phone during meetings",
+      prompt: "You are a prospect who is interested in a competitive solution.",
+      firstMessage: "I'm interested in your solution. What can you tell me about it?",
+      voiceId: "EXAVITQu4vr4xnSDxMaL"
+    }
+  },
+  {
+    id: "rs3",
+    title: "Executive Buy-in Challenge",
+    description: "Play the role of a CEO being pitched a strategic partnership.",
+    category: "Reverse Sales Meetings",
+    difficulty: "Advanced",
+    persona: {
+      name: "John Smith",
+      role: "Sales Director",
+      company: "TechFlow Solutions",
+      personality: "Confident, persuasive, and results-oriented",
+      background: "10 years in sales, previously worked at a large corporation. Looking to close deals and drive revenue.",
+      appearance: "Mid-50s Caucasian professional, always well-dressed in business attire, frequently checks his smartwatch during meetings",
+      prompt: "You are a senior sales executive proposing a strategic partnership. Focus on long-term value creation, market positioning, and competitive advantage.",
+      firstMessage: "Our research shows that this partnership could create significant market opportunities for both organizations. What's your vision for your company's growth in the next 3-5 years?",
+      voiceId: "CwhRBWXzGAHq8TQ4Fs17"
+    }
+  }
+];
