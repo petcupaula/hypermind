@@ -2,9 +2,29 @@
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 const Navigation = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Signed out",
+        description: "Successfully signed out.",
+      });
+      navigate("/");
+    }
+  };
 
   return (
     <nav className="fixed top-0 w-full z-50 px-6 py-4 bg-white/50 backdrop-blur-lg border-b border-gray-200">
@@ -21,20 +41,37 @@ const Navigation = () => {
         </div>
         
         <div className="flex items-center space-x-4">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => navigate("/auth")}
-          >
-            Sign In
-          </Button>
-          <Button 
-            size="sm" 
-            className="bg-primary hover:bg-primary/90"
-            onClick={() => navigate("/auth")}
-          >
-            Start Free Trial
-          </Button>
+          {supabase.auth.getSession() ? (
+            <>
+              <Link to="/dashboard">
+                <Button variant="ghost" size="sm">Dashboard</Button>
+              </Link>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleSignOut}
+              >
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => navigate("/auth")}
+              >
+                Sign In
+              </Button>
+              <Button 
+                size="sm" 
+                className="bg-primary hover:bg-primary/90"
+                onClick={() => navigate("/auth")}
+              >
+                Start Free Trial
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </nav>
