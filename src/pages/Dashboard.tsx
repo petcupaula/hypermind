@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AnimatedGradient from "@/components/ui/animated-gradient";
@@ -17,7 +16,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const categories = Array.from(new Set(scenarios.map(s => s.category)));
 
-  // Set initial category
   useEffect(() => {
     if (categories.length > 0 && !selectedCategory) {
       setSelectedCategory(categories[0]);
@@ -25,7 +23,6 @@ const Dashboard = () => {
   }, [categories]);
 
   useEffect(() => {
-    // Check if user is authenticated
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         navigate('/auth');
@@ -34,7 +31,6 @@ const Dashboard = () => {
       }
     });
 
-    // Listen for auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -48,7 +44,6 @@ const Dashboard = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Don't render anything until we've checked authentication
   if (!session) {
     return null;
   }
@@ -82,7 +77,6 @@ const Dashboard = () => {
             </div>
 
             <div className="grid grid-cols-12 gap-8">
-              {/* Left Panel - Categories */}
               <div className="col-span-3 bg-card rounded-lg border shadow-sm min-h-[calc(100vh-320px)]">
                 <div className="p-4 space-y-2">
                   {categories.map((category) => (
@@ -102,21 +96,18 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Right Panel - Scenarios */}
               <div className="col-span-9">
-                <ScrollArea className="h-[calc(100vh-320px)]">
-                  <div className="space-y-4 pr-4">
-                    {scenarios
-                      .filter((scenario) => scenario.category === selectedCategory)
-                      .map((scenario) => (
-                        <ScenarioCard
-                          key={scenario.id}
-                          scenario={scenario}
-                          onStart={setSelectedScenario}
-                        />
-                      ))}
-                  </div>
-                </ScrollArea>
+                <div className="space-y-4">
+                  {scenarios
+                    .filter((scenario) => scenario.category === selectedCategory)
+                    .map((scenario) => (
+                      <ScenarioCard
+                        key={scenario.id}
+                        scenario={scenario}
+                        onStart={setSelectedScenario}
+                      />
+                    ))}
+                </div>
               </div>
             </div>
           </div>
