@@ -1,12 +1,14 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { UserCircle, Building2, CreditCard } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -52,6 +54,7 @@ const Profile = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile"],
@@ -75,6 +78,19 @@ const Profile = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("No session found");
 
+      if (avatarFile) {
+        const fileExt = avatarFile.name.split('.').pop();
+        const filePath = `${session.user.id}/avatar.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, avatarFile, { upsert: true });
+          
+        if (!uploadError) {
+          formData.avatar_url = filePath;
+        }
+      }
+
       const { error } = await supabase
         .from("profiles")
         .update(formData)
@@ -87,9 +103,10 @@ const Profile = () => {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast({
         title: "Profile updated",
-        description: "Your profile has been successfully updated.",
+        description: "Your account has been successfully updated.",
       });
       setIsEditing(false);
+      setAvatarFile(null);
     },
     onError: (error) => {
       toast({
@@ -99,6 +116,12 @@ const Profile = () => {
       });
     },
   });
+
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setAvatarFile(event.target.files[0]);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -121,7 +144,7 @@ const Profile = () => {
       <div>
         <Navigation />
         <div className="container max-w-4xl mx-auto pt-20">
-          <p className="text-center py-8">Loading profile...</p>
+          <p className="text-center py-8">Loading account...</p>
         </div>
       </div>
     );
@@ -131,130 +154,194 @@ const Profile = () => {
     <div>
       <Navigation />
       <div className="container max-w-4xl mx-auto pt-20">
-        <Card>
-          <CardHeader>
-            <CardTitle>Profile Settings</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    defaultValue={profile?.name || ""}
-                    disabled={!isEditing}
-                  />
-                </div>
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">Account Settings</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your account settings and preferences
+          </p>
+        </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="company">Company</Label>
-                  <Input
-                    id="company"
-                    name="company"
-                    defaultValue={profile?.company || ""}
-                    disabled={!isEditing}
-                  />
-                </div>
+        <Tabs defaultValue="profile" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="profile" className="flex items-center gap-2">
+              <UserCircle className="h-4 w-4" />
+              Profile
+            </TabsTrigger>
+            <TabsTrigger value="company" className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              Company Info
+            </TabsTrigger>
+            <TabsTrigger value="billing" className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              Billing
+            </TabsTrigger>
+          </TabsList>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="role">Role</Label>
-                  <Input
-                    id="role"
-                    name="role"
-                    defaultValue={profile?.role || ""}
-                    disabled={!isEditing}
-                  />
-                </div>
+          <TabsContent value="profile">
+            <Card>
+              <CardContent className="pt-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="flex items-center gap-6">
+                    <Avatar className="w-20 h-20">
+                      <AvatarImage 
+                        src={avatarFile ? URL.createObjectURL(avatarFile) : profile?.avatar_url} 
+                        alt={profile?.name} 
+                      />
+                      <AvatarFallback>{profile?.name?.charAt(0) || 'U'}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <Label htmlFor="avatar" className="text-sm font-medium">
+                        Profile Picture
+                      </Label>
+                      <Input
+                        id="avatar"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarChange}
+                        disabled={!isEditing}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="industry">Industry</Label>
-                  <Select 
-                    disabled={!isEditing}
-                    value={profile?.industry}
-                    onValueChange={(value) => {
-                      const element = document.getElementById('industry');
-                      if (element) {
-                        element.setAttribute('data-value', value);
-                      }
-                    }}
-                  >
-                    <SelectTrigger id="industry">
-                      <SelectValue placeholder="Select your industry" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {industries.map((industry) => (
-                        <SelectItem key={industry} value={industry}>
-                          {industry}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      defaultValue={profile?.name || ""}
+                      disabled={!isEditing}
+                    />
+                  </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="target_market">Target Market</Label>
-                  <Select
-                    disabled={!isEditing}
-                    value={profile?.target_market}
-                    onValueChange={(value) => {
-                      const element = document.getElementById('target_market');
-                      if (element) {
-                        element.setAttribute('data-value', value);
-                      }
-                    }}
-                  >
-                    <SelectTrigger id="target_market">
-                      <SelectValue placeholder="Select your target market" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {targetMarkets.map((market) => (
-                        <SelectItem key={market} value={market}>
-                          {market}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="role">Role</Label>
+                    <Input
+                      id="role"
+                      name="role"
+                      defaultValue={profile?.role || ""}
+                      disabled={!isEditing}
+                    />
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="description">
-                    Product/Service Description
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Describe the products or services that you or your company offers to customers
+          <TabsContent value="company">
+            <Card>
+              <CardContent className="pt-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid gap-2">
+                    <Label htmlFor="company">Company Name</Label>
+                    <Input
+                      id="company"
+                      name="company"
+                      defaultValue={profile?.company || ""}
+                      disabled={!isEditing}
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="industry">Industry</Label>
+                    <Select 
+                      disabled={!isEditing}
+                      value={profile?.industry}
+                      onValueChange={(value) => {
+                        const element = document.getElementById('industry');
+                        if (element) {
+                          element.setAttribute('data-value', value);
+                        }
+                      }}
+                    >
+                      <SelectTrigger id="industry">
+                        <SelectValue placeholder="Select your industry" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {industries.map((industry) => (
+                          <SelectItem key={industry} value={industry}>
+                            {industry}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="target_market">Target Market</Label>
+                    <Select
+                      disabled={!isEditing}
+                      value={profile?.target_market}
+                      onValueChange={(value) => {
+                        const element = document.getElementById('target_market');
+                        if (element) {
+                          element.setAttribute('data-value', value);
+                        }
+                      }}
+                    >
+                      <SelectTrigger id="target_market">
+                        <SelectValue placeholder="Select your target market" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {targetMarkets.map((market) => (
+                          <SelectItem key={market} value={market}>
+                            {market}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="description">
+                      Product/Service Description
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Describe the products or services that you or your company offers to customers
+                    </p>
+                    <Textarea
+                      id="description"
+                      name="description"
+                      defaultValue={profile?.description || ""}
+                      disabled={!isEditing}
+                      className="min-h-[100px]"
+                      placeholder="E.g., We provide enterprise-grade cybersecurity solutions that protect companies from advanced cyber threats..."
+                    />
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="billing">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">
+                    Billing features coming soon...
                   </p>
-                  <Textarea
-                    id="description"
-                    name="description"
-                    defaultValue={profile?.description || ""}
-                    disabled={!isEditing}
-                    className="min-h-[100px]"
-                    placeholder="E.g., We provide enterprise-grade cybersecurity solutions that protect companies from advanced cyber threats..."
-                  />
                 </div>
-              </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
-              <div className="flex justify-end gap-4">
-                {!isEditing ? (
-                  <Button type="button" onClick={() => setIsEditing(true)}>
-                    Edit Profile
-                  </Button>
-                ) : (
-                  <>
-                    <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
-                      Cancel
-                    </Button>
-                    <Button type="submit" disabled={updateProfile.isPending}>
-                      Save Changes
-                    </Button>
-                  </>
-                )}
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+        <div className="flex justify-end gap-4 mt-6">
+          {!isEditing ? (
+            <Button type="button" onClick={() => setIsEditing(true)}>
+              Edit Account
+            </Button>
+          ) : (
+            <>
+              <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" form="profile-form" disabled={updateProfile.isPending}>
+                Save Changes
+              </Button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
