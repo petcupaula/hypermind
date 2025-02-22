@@ -1,15 +1,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Mic, Bot, Volume2, VolumeX } from "lucide-react";
+import { Mic, Bot } from "lucide-react";
 import { useConversation } from "@11labs/react";
 import { useToast } from "@/components/ui/use-toast";
 
 const ChatInterface = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(1);
   const { toast } = useToast();
   const conversationRef = useRef(null);
 
@@ -108,15 +106,7 @@ const ChatInterface = () => {
     if (conversationRef.current) {
       conversationRef.current.endSession();
       conversationRef.current = null;
-    }
-  };
-
-  const toggleMute = () => {
-    const newVolume = isMuted ? 1 : 0;
-    setIsMuted(!isMuted);
-    setVolume(newVolume);
-    if (conversationRef.current) {
-      conversationRef.current.setVolume({ volume: newVolume });
+      setIsConnected(false); // Immediately update the connection status
     }
   };
 
@@ -133,7 +123,7 @@ const ChatInterface = () => {
   return (
     <div className="w-full max-w-3xl mx-auto bg-white/50 backdrop-blur-lg rounded-2xl border border-gray-200 shadow-lg">
       <div className="border-b p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center">
           <div className="flex items-center gap-3">
             <div className="bg-primary/10 p-2 rounded-lg">
               <Bot className="h-5 w-5 text-primary" />
@@ -142,20 +132,6 @@ const ChatInterface = () => {
               <h3 className="font-medium">Enterprise CTO Persona</h3>
               <p className="text-sm text-gray-500">Tech-savvy decision maker at a Fortune 500 company</p>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleMute}
-              className={isSpeaking ? "opacity-100" : "opacity-50"}
-            >
-              {isMuted ? (
-                <VolumeX className="h-5 w-5" />
-              ) : (
-                <Volume2 className="h-5 w-5" />
-              )}
-            </Button>
           </div>
         </div>
       </div>
