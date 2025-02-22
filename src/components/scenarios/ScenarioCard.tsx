@@ -8,6 +8,12 @@ export interface Scenario {
   title: string;
   description: string;
   persona: {
+    name: string;
+    role: string;
+    company: string;
+    personality: string;
+    background: string;
+    appearance: string;
     prompt: string;
     firstMessage: string;
     voiceId: string;
@@ -33,6 +39,10 @@ const ScenarioCard = ({ scenario, onStart }: ScenarioCardProps) => {
             <div>
               <h3 className="font-semibold mb-1">{scenario.title}</h3>
               <p className="text-sm text-gray-600 mb-2">{scenario.description}</p>
+              <div className="text-sm text-gray-500">
+                <p><span className="font-medium">Speaking with:</span> {scenario.persona.name}</p>
+                <p><span className="font-medium">Role:</span> {scenario.persona.role} at {scenario.persona.company}</p>
+              </div>
             </div>
             <div className="shrink-0">
               <span className={`text-xs px-2 py-1 rounded-full ${
