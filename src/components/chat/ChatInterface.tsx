@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, Bot } from "lucide-react";
@@ -111,10 +110,15 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
 
         if (uploadError) {
           console.error('Error uploading recording:', uploadError);
+          toast({
+            title: "Error",
+            description: "Failed to save recording",
+            variant: "destructive",
+          });
         } else {
           const { data: { publicUrl } } = supabase.storage
             .from('call-recordings')
-            .getPublicUrl(uploadData.path);
+            .getPublicUrl(`${sessionData.session.user.id}/${file.name}`);
           recordingUrl = publicUrl;
         }
       }
@@ -134,9 +138,16 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
           description: "Failed to save call history",
           variant: "destructive",
         });
+      } else {
+        console.log('Call history saved successfully');
       }
     } catch (error) {
       console.error('Error in saveCallHistory:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while saving the call",
+        variant: "destructive",
+      });
     }
   };
 

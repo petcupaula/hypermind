@@ -30,6 +30,12 @@ const CallHistory = () => {
   const { data: calls = [], isLoading } = useQuery({
     queryKey: ['call-history'],
     queryFn: async () => {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData.session) {
+        console.error('No active session found');
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('call_history')
         .select(`
@@ -41,6 +47,7 @@ const CallHistory = () => {
             difficulty
           )
         `)
+        .eq('user_id', sessionData.session.user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
