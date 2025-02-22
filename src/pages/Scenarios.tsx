@@ -50,7 +50,10 @@ const Dashboard = () => {
         persona: {
           prompt: scenario.persona.prompt,
           firstMessage: scenario.persona.first_message,
-          voiceId: scenario.persona.voice_id
+          voiceId: scenario.persona.voice_id,
+          name: scenario.persona.name,
+          role: scenario.persona.role,
+          company: scenario.persona.company
         }
       }));
     }
