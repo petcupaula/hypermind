@@ -19,6 +19,28 @@ export const useConversationManager = (scenario: Scenario) => {
   const transcriptMessagesRef = useRef<string[]>([]);
   const currentCallRef = useRef<{ id: string } | null>(null);
 
+  const fetchConversationAudio = async (conversationId: string) => {
+    try {
+      console.log('Fetching conversation audio for ID:', conversationId);
+      const response = await fetch(`https://api.elevenlabs.io/v1/conversations/${conversationId}/audio`, {
+        headers: {
+          'xi-api-key': import.meta.env.VITE_ELEVENLABS_API_KEY,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch conversation audio');
+      }
+
+      const audioBlob = await response.blob();
+      console.log('Successfully fetched conversation audio, size:', audioBlob.size);
+      return audioBlob;
+    } catch (error) {
+      console.error('Error fetching conversation audio:', error);
+      throw error;
+    }
+  };
+
   const saveCallHistory = async () => {
     if (!duration) {
       console.log('No duration recorded, skipping call history save');
@@ -56,25 +78,25 @@ export const useConversationManager = (scenario: Scenario) => {
         return;
       }
 
-      if (audioChunksRef.current.length > 0) {
+      if (currentCallRef.current?.id) {
         try {
-          console.log('Processing audio recording...');
-          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-          const fileName = `call-${Date.now()}.webm`;
-          const filePath = `${sessionData.session.user.id}/${fileName}`;
-          const file = new File([audioBlob], fileName, { type: 'audio/webm' });
+          console.log('Fetching full conversation audio...');
+          const audioBlob = await fetchConversationAudio(currentCallRef.current.id);
           
-          console.log('Uploading recording to storage...');
-          const { data: uploadData, error: uploadError } = await supabase.storage
+          const fileName = `conversation-${Date.now()}.mp3`;
+          const filePath = `${sessionData.session.user.id}/${fileName}`;
+          
+          console.log('Uploading conversation audio to storage...');
+          const { error: uploadError } = await supabase.storage
             .from('call-recordings')
-            .upload(filePath, file);
+            .upload(filePath, audioBlob);
 
           if (uploadError) {
-            console.error('Error uploading recording:', uploadError);
+            console.error('Error uploading conversation audio:', uploadError);
             throw uploadError;
           }
 
-          console.log('Recording uploaded successfully');
+          console.log('Conversation audio uploaded successfully');
           const { data: { publicUrl } } = supabase.storage
             .from('call-recordings')
             .getPublicUrl(filePath);
@@ -92,10 +114,10 @@ export const useConversationManager = (scenario: Scenario) => {
             throw updateError;
           }
         } catch (error) {
-          console.error('Error handling recording:', error);
+          console.error('Error handling conversation audio:', error);
           toast({
             title: "Warning",
-            description: "Call saved but failed to save recording",
+            description: "Call saved but failed to save conversation recording",
             variant: "destructive",
           });
           return;
