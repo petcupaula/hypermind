@@ -8,6 +8,12 @@ import { useConversation } from "@11labs/react";
 const ChatInterface = () => {
   const [message, setMessage] = useState("");
   const [isMuted, setIsMuted] = useState(false);
+  const [messages, setMessages] = useState([
+    {
+      role: "assistant",
+      content: "Hello! I'm interested in learning more about your solution. We're currently facing some challenges with our data infrastructure. Can you tell me how your product might help?"
+    }
+  ]);
 
   // Initialize ElevenLabs conversation
   const conversation = useConversation({
@@ -18,8 +24,26 @@ const ChatInterface = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle message submission
+    if (!message.trim()) return;
+
+    // Add user message to chat
+    const userMessage = { role: "user", content: message };
+    setMessages(prev => [...prev, userMessage]);
+
+    // Clear input
     setMessage("");
+
+    // AI response
+    const aiResponse = {
+      role: "assistant",
+      content: "Our solution provides a robust data infrastructure that can handle your enterprise needs. We offer seamless integration, real-time analytics, and scalable architecture that can grow with your business. Would you like me to elaborate on any specific aspect?"
+    };
+
+    // Add AI response to chat
+    setMessages(prev => [...prev, aiResponse]);
+
+    // Speak the response using ElevenLabs
+    await conversation.generateSpeech({ text: aiResponse.content });
   };
 
   const toggleMute = async () => {
@@ -59,13 +83,15 @@ const ChatInterface = () => {
       
       <div className="h-[400px] p-6 overflow-y-auto">
         <div className="space-y-4">
-          <div className="flex items-start gap-4">
-            <div className="flex-1 bg-primary/5 rounded-2xl p-4">
-              <p className="text-sm text-gray-800">
-                Hello! I'm interested in learning more about your solution. We're currently facing some challenges with our data infrastructure. Can you tell me how your product might help?
-              </p>
+          {messages.map((msg, index) => (
+            <div key={index} className="flex items-start gap-4">
+              <div className={`flex-1 ${msg.role === "assistant" ? "bg-primary/5" : "bg-blue-50"} rounded-2xl p-4`}>
+                <p className="text-sm text-gray-800">
+                  {msg.content}
+                </p>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
       </div>
       
