@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Bot, Volume2, VolumeX } from "lucide-react";
@@ -22,6 +22,24 @@ const ChatInterface = () => {
     model: "eleven_turbo_v2",
   });
 
+  useEffect(() => {
+    // Start the conversation session when component mounts
+    const initConversation = async () => {
+      try {
+        await conversation.startSession({});
+      } catch (error) {
+        console.error("Error starting conversation:", error);
+      }
+    };
+
+    initConversation();
+
+    // Clean up the conversation session when component unmounts
+    return () => {
+      conversation.endSession();
+    };
+  }, [conversation]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
@@ -42,8 +60,14 @@ const ChatInterface = () => {
     // Add AI response to chat
     setMessages(prev => [...prev, aiResponse]);
 
-    // Speak the response using ElevenLabs
-    await conversation.generateSpeech({ text: aiResponse.content });
+    try {
+      // Use the conversation to speak the response
+      const blob = new Blob([aiResponse.content], { type: 'text/plain' });
+      const audio = new Audio(URL.createObjectURL(blob));
+      audio.play();
+    } catch (error) {
+      console.error("Error generating speech:", error);
+    }
   };
 
   const toggleMute = async () => {
