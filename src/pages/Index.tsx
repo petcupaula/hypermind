@@ -164,19 +164,7 @@ const Index = () => {
             >
               ← Back to scenarios
             </Button>
-            <ChatInterface 
-              scenarioOverrides={{
-                agent: {
-                  prompt: {
-                    prompt: selectedScenario.persona.prompt,
-                  },
-                  firstMessage: selectedScenario.persona.firstMessage,
-                },
-                tts: {
-                  voiceId: selectedScenario.persona.voiceId,
-                },
-              }}
-            />
+            <ChatInterface />
           </div>
         ) : (
           <div className="max-w-4xl mx-auto">
