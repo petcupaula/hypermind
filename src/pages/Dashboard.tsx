@@ -83,30 +83,28 @@ const Dashboard = () => {
 
             <div className="grid grid-cols-12 gap-8">
               {/* Left Panel - Categories */}
-              <div className="col-span-3 bg-card rounded-lg border shadow-sm">
-                <ScrollArea className="h-[600px]">
-                  <div className="p-4 space-y-2">
-                    {categories.map((category) => (
-                      <Button
-                        key={category}
-                        variant={selectedCategory === category ? "secondary" : "ghost"}
-                        className={`w-full justify-start text-left font-medium ${
-                          selectedCategory === category 
-                            ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-                            : "hover:bg-secondary"
-                        }`}
-                        onClick={() => setSelectedCategory(category)}
-                      >
-                        {category}
-                      </Button>
-                    ))}
-                  </div>
-                </ScrollArea>
+              <div className="col-span-3 bg-card rounded-lg border shadow-sm min-h-[calc(100vh-320px)]">
+                <div className="p-4 space-y-2">
+                  {categories.map((category) => (
+                    <Button
+                      key={category}
+                      variant={selectedCategory === category ? "secondary" : "ghost"}
+                      className={`w-full justify-start text-left font-medium ${
+                        selectedCategory === category 
+                          ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+                          : "hover:bg-secondary"
+                      }`}
+                      onClick={() => setSelectedCategory(category)}
+                    >
+                      {category}
+                    </Button>
+                  ))}
+                </div>
               </div>
 
               {/* Right Panel - Scenarios */}
               <div className="col-span-9">
-                <ScrollArea className="h-[600px]">
+                <ScrollArea className="h-[calc(100vh-320px)]">
                   <div className="space-y-4 pr-4">
                     {scenarios
                       .filter((scenario) => scenario.category === selectedCategory)
