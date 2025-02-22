@@ -62,7 +62,7 @@ const Navigation = () => {
           {session ? (
             <>
               <Link to="/dashboard">
-                <Button variant="ghost" size="sm">Dashboard</Button>
+                <Button variant="ghost" size="sm">Scenarios</Button>
               </Link>
               <Button 
                 variant="outline" 
