@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -23,6 +22,16 @@ interface EvalCriteriaResult {
 interface DataCollectionResult {
   field: string;
   value: string | null;
+}
+
+interface EvaluationResult {
+  result: "success" | "failure";
+  rationale: string;
+  criteria_id: string;
+}
+
+type EvaluationCriteriaResults = {
+  [key: string]: EvaluationResult;
 }
 
 type CallRecord = Database["public"]["Tables"]["call_history"]["Row"] & {
@@ -258,19 +267,19 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
   }, [activeAudio]);
 
   const renderCriteriaResults = (results: unknown) => {
-    const typedResults = results as EvalCriteriaResult[];
-    if (!Array.isArray(typedResults)) return null;
+    const typedResults = results as EvaluationCriteriaResults;
+    if (!typedResults || typeof typedResults !== 'object') return null;
     
-    return typedResults.map((result, index) => (
-      <div key={index} className="flex items-start gap-2 p-3 bg-muted/30 rounded-md">
-        {result.passed ? (
+    return Object.entries(typedResults).map(([key, result]) => (
+      <div key={key} className="flex items-start gap-2 p-3 bg-muted/30 rounded-md">
+        {result.result === "success" ? (
           <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
         ) : (
           <XCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
         )}
         <div>
-          <div className="font-medium">{result.criterion}</div>
-          <div className="text-sm text-muted-foreground">{result.explanation}</div>
+          <div className="font-medium capitalize">{key.replace(/_/g, ' ')}</div>
+          <div className="text-sm text-muted-foreground">{result.rationale}</div>
         </div>
       </div>
     ));
