@@ -7,11 +7,36 @@ const Pricing = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen pt-24 pb-16">
-      <div className="container">
+    <div className="min-h-screen">
+      <div className="relative overflow-hidden">
+        {/* Gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 -z-10" />
+        
+        {/* Header section */}
+        <div className="pt-32 pb-20 px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Simple, Transparent Pricing
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Choose the plan that's right for you. All plans include a 14-day free trial.
+              No credit card required.
+            </p>
+            <div className="inline-block rounded-full bg-white/50 backdrop-blur-sm border border-gray-200 p-1">
+              <div className="flex items-center gap-2">
+                <span className="px-4 py-2 text-sm">Monthly</span>
+                <div className="bg-primary text-white px-4 py-2 rounded-full text-sm">
+                  Annual (Save 20%)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Pricing cards */}
+      <div className="pb-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-4xl font-bold text-center mb-12">Pricing Plans</h1>
-          
           <div className="grid gap-8 md:grid-cols-3">
             <div className="bg-white/50 backdrop-blur-lg p-6 rounded-2xl border border-gray-200">
               <h3 className="text-xl font-semibold mb-2">Starter</h3>

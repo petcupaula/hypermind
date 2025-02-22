@@ -1,17 +1,53 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Building2, Shield, Users2, Headphones } from "lucide-react";
 
 const Enterprise = () => {
   return (
-    <div className="min-h-screen pt-24 pb-16">
-      <div className="container">
+    <div className="min-h-screen">
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 -z-10" />
+        
+        <div className="pt-32 pb-20 px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-block rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary mb-6">
+              For Large Organizations
+            </div>
+            <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Enterprise-Grade AI Training
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Scale your sales team's capabilities with custom AI training solutions.
+              Built for security, compliance, and performance at scale.
+            </p>
+            <div className="flex items-center justify-center gap-6 mb-12">
+              <Button size="lg" className="gap-2">
+                Schedule a Demo
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+              <Button size="lg" variant="outline">
+                Contact Sales
+              </Button>
+            </div>
+            <div className="flex items-center justify-center gap-8 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                <span>SOC 2 Certified</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users2 className="h-4 w-4" />
+                <span>99.9% Uptime SLA</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                <span>24/7 Support</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="pb-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-center mb-4">Enterprise Solutions</h1>
-          <p className="text-xl text-gray-600 text-center mb-12 max-w-2xl mx-auto">
-            Custom AI training solutions for large organizations. Scale your sales team's capabilities with enterprise-grade features and support.
-          </p>
-          
           <div className="grid gap-8 md:grid-cols-2 mb-12">
             <div className="bg-white/50 backdrop-blur-lg p-6 rounded-2xl border border-gray-200">
               <div className="bg-primary/10 p-3 rounded-lg w-fit mb-4">

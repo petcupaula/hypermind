@@ -1,13 +1,42 @@
 
 import { Bot, Brain, BarChart2, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Features = () => {
+  const navigate = useNavigate();
+  
   return (
-    <div className="min-h-screen pt-24 pb-16">
-      <div className="container">
+    <div className="min-h-screen">
+      <div className="relative overflow-hidden">
+        {/* Gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 -z-10" />
+        
+        {/* Header section */}
+        <div className="pt-32 pb-20 px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Transform Your Sales Game
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Practice makes perfect. Our AI-powered platform provides realistic scenarios 
+              to help you master sales conversations and close more deals.
+            </p>
+            <div className="flex items-center justify-center gap-4">
+              <Button size="lg" onClick={() => navigate("/auth")}>
+                Start Free Trial
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => navigate("/enterprise")}>
+                Schedule Demo
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Features grid */}
+      <div className="py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-center mb-12">Features</h1>
-          
           <div className="grid gap-8 md:grid-cols-2">
             <div className="bg-white/50 backdrop-blur-lg p-6 rounded-2xl border border-gray-200">
               <div className="bg-primary/10 p-3 rounded-lg w-fit mb-4">
