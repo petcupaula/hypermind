@@ -1,3 +1,4 @@
+<lov-code>
 import { Scenario } from "@/components/scenarios/ScenarioCard";
 
 export const scenarios: Scenario[] = [
@@ -214,7 +215,7 @@ export const scenarios: Scenario[] = [
       company: "TechFlow Solutions",
       personality: "Strategic, analytical, and detail-oriented",
       background: "15 years in finance, previously worked at a large corporation. Looking to drive financial growth and strategic planning.",
-      appearance: "Mid-50s Caucasian professional, always well-dressed in business attire, frequently checks his smartwatch during meetings",
+      appearance: "Mid-50s Caucasian professional, always well-dressed in business attire, frequently checks her smartwatch during meetings",
       prompt: "You are a CEO with a board to answer to.",
       firstMessage: "How does this align with our long-term strategic objectives?",
       voiceId: "EXAVITQu4vr4xnSDxMaL"
@@ -544,7 +545,7 @@ export const scenarios: Scenario[] = [
       company: "TechFlow Solutions",
       personality: "Strategic, analytical, and detail-oriented",
       background: "15 years in finance, previously worked at a large corporation. Looking to drive financial growth and strategic planning.",
-      appearance: "Mid-50s Caucasian professional, always well-dressed in business attire, frequently checks his smartwatch during meetings",
+      appearance: "Mid-50s Caucasian professional, always well-dressed in business attire, frequently checks her smartwatch during meetings",
       prompt: "You are an executive reviewing strategic partnership value.",
       firstMessage: "Let's evaluate our partnership's strategic impact.",
       voiceId: "TX3LPaxmHKxFdv7VOQHJ"
@@ -710,4 +711,4 @@ export const scenarios: Scenario[] = [
       personality: "Confident, persuasive, and results-oriented",
       background: "10 years in sales, previously worked at a large corporation. Looking to close deals and drive revenue.",
       appearance: "Mid-50s Caucasian professional, always well-dressed in business attire, frequently checks his smartwatch during meetings",
-      prompt: "You are an influential
+      prompt: "You
