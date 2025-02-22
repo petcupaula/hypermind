@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, Bot } from "lucide-react";
@@ -19,7 +18,11 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   const conversationRef = useRef(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize ElevenLabs conversation
+  const transformImageUrl = (url: string) => {
+    if (!url) return url;
+    return `${url}?width=300&height=300&resize=contain`;
+  };
+
   const conversation = useConversation({
     api_key: import.meta.env.VITE_ELEVENLABS_API_KEY,
     onConnect: () => {
@@ -73,7 +76,6 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
     },
   });
 
-  // Format duration into MM:SS
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -82,12 +84,10 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
 
   useEffect(() => {
     if (isConnected) {
-      // Start the timer when connected
       timerRef.current = setInterval(() => {
         setDuration(prev => prev + 1);
       }, 1000);
     } else {
-      // Clear the timer and reset duration when disconnected
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
@@ -105,9 +105,8 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   const startConversation = async () => {
     try {
       console.log("Starting conversation - Requesting microphone access...");
-      setLastCallDuration(null); // Reset last call duration when starting new call
+      setLastCallDuration(null);
       
-      // Request microphone access before starting
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
           echoCancellation: true,
@@ -117,7 +116,6 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
       });
       console.log("Microphone access granted", stream.active);
       
-      // Start the conversation with your agent ID
       console.log("Initiating ElevenLabs session...");
       await conversation.startSession({
         agentId: "IFTHFHzCj8SPqmuq1gSq",
@@ -143,7 +141,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   const stopConversation = () => {
     console.log("Manually stopping conversation...");
     if (conversationRef.current) {
-      setLastCallDuration(duration); // Store the duration when manually stopping
+      setLastCallDuration(duration);
       conversationRef.current.endSession();
       conversationRef.current = null;
       setIsConnected(false);
@@ -166,11 +164,10 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
           <div className="bg-primary/10 rounded-lg w-[74px] h-[74px] flex items-center justify-center overflow-hidden">
             {scenario.persona.avatarUrl ? (
               <img
-                src={scenario.persona.avatarUrl}
+                src={transformImageUrl(scenario.persona.avatarUrl)}
                 alt={scenario.persona.name || "Persona avatar"}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  // Fallback to Bot icon if image fails to load
                   e.currentTarget.style.display = 'none';
                   e.currentTarget.parentElement?.querySelector('.fallback-icon')?.removeAttribute('style');
                 }}

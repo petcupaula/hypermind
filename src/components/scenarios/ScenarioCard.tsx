@@ -26,13 +26,18 @@ interface ScenarioCardProps {
 }
 
 const ScenarioCard = ({ scenario, onStart }: ScenarioCardProps) => {
+  const transformImageUrl = (url: string) => {
+    if (!url) return url;
+    return `${url}?width=300&height=300&resize=contain`;
+  };
+
   return (
     <Card className="p-6 hover:shadow-lg transition-shadow">
       <div className="flex items-start gap-4">
         <div className="bg-primary/10 rounded-lg w-[74px] h-[74px] flex items-center justify-center overflow-hidden">
           {scenario.persona.avatarUrl ? (
             <img
-              src={scenario.persona.avatarUrl}
+              src={transformImageUrl(scenario.persona.avatarUrl)}
               alt={scenario.persona.name || "Persona avatar"}
               className="w-full h-full object-cover"
               onError={(e) => {
