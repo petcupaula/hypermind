@@ -12,8 +12,6 @@ export type Database = {
       call_history: {
         Row: {
           call_successful: boolean | null
-          conversation_details: Json | null
-          conversation_state: string | null
           created_at: string
           data_collection_results: Json | null
           duration: number
@@ -28,8 +26,6 @@ export type Database = {
         }
         Insert: {
           call_successful?: boolean | null
-          conversation_details?: Json | null
-          conversation_state?: string | null
           created_at?: string
           data_collection_results?: Json | null
           duration: number
@@ -44,8 +40,6 @@ export type Database = {
         }
         Update: {
           call_successful?: boolean | null
-          conversation_details?: Json | null
-          conversation_state?: string | null
           created_at?: string
           data_collection_results?: Json | null
           duration?: number
