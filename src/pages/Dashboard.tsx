@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AnimatedGradient from "@/components/ui/animated-gradient";
 import Navigation from "@/components/layout/Navigation";
@@ -7,6 +7,7 @@ import ChatInterface from "@/components/chat/ChatInterface";
 import ScenarioCard, { Scenario } from "@/components/scenarios/ScenarioCard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
 
 const scenarios: Scenario[] = [
   {
@@ -61,8 +62,38 @@ const scenarios: Scenario[] = [
 
 const Dashboard = () => {
   const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
+  const [session, setSession] = useState<any>(null);
   const navigate = useNavigate();
   const categories = Array.from(new Set(scenarios.map(s => s.category)));
+
+  useEffect(() => {
+    // Check if user is authenticated
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate('/auth');
+      } else {
+        setSession(session);
+      }
+    });
+
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        navigate('/auth');
+      } else {
+        setSession(session);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  // Don't render anything until we've checked authentication
+  if (!session) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen">
