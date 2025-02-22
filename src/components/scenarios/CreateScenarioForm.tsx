@@ -169,11 +169,22 @@ const CreateScenarioForm = () => {
 
     try {
       setIsPlaying(true);
+      
+      const apiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
+      
+      if (!apiKey) {
+        throw new Error("ElevenLabs API key not found");
+      }
+
+      if (!formData.persona.voiceId) {
+        throw new Error("No voice ID selected");
+      }
+
       const response = await fetch("https://api.elevenlabs.io/v1/text-to-speech/" + formData.persona.voiceId, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "xi-api-key": import.meta.env.VITE_ELEVEN_LABS_API_KEY || "",
+          "xi-api-key": apiKey,
         },
         body: JSON.stringify({
           text: "Hello! This is how I sound.",
@@ -186,7 +197,8 @@ const CreateScenarioForm = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate voice preview");
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.detail || `API error: ${response.status}`);
       }
 
       const audioBlob = await response.blob();
@@ -195,15 +207,16 @@ const CreateScenarioForm = () => {
       
       audio.onended = () => {
         setIsPlaying(false);
+        URL.revokeObjectURL(audioUrl);
       };
 
       setAudioElement(audio);
-      audio.play();
+      await audio.play();
     } catch (error) {
       console.error("Error previewing voice:", error);
       toast({
         title: "Error",
-        description: "Failed to preview voice. Please check your API key and voice ID.",
+        description: error.message || "Failed to preview voice. Please check your API key and voice ID.",
         variant: "destructive",
       });
       setIsPlaying(false);
