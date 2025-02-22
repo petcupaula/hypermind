@@ -17,6 +17,7 @@ export const useConversationManager = (scenario: Scenario) => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const transcriptMessagesRef = useRef<string[]>([]);
+  const currentCallRef = useRef<{ id: string } | null>(null);
 
   const saveCallHistory = async () => {
     if (!duration) {
@@ -42,6 +43,7 @@ export const useConversationManager = (scenario: Scenario) => {
         scenario_id: scenario.id,
         duration,
         transcript: fullTranscript || null,
+        elevenlabs_conversation_id: currentCallRef.current?.id || null,
       });
 
       if (insertError) {
@@ -193,7 +195,7 @@ export const useConversationManager = (scenario: Scenario) => {
       console.log("Microphone access granted", stream.active);
       
       console.log("Initiating ElevenLabs session...");
-      await conversation.startSession({
+      const conversationId = await conversation.startSession({
         agentId: "IFTHFHzCj8SPqmuq1gSq",
         connectionOptions: {
           reconnect: true,
@@ -201,6 +203,8 @@ export const useConversationManager = (scenario: Scenario) => {
         },
       });
       
+      console.log("Conversation started with ID:", conversationId);
+      currentCallRef.current = { id: conversationId };
       conversationRef.current = conversation;
       
     } catch (error) {
@@ -230,6 +234,7 @@ export const useConversationManager = (scenario: Scenario) => {
         
         conversationRef.current.endSession();
         conversationRef.current = null;
+        currentCallRef.current = null;
         setIsConnected(false);
       } catch (error) {
         console.error('Error during conversation stop:', error);

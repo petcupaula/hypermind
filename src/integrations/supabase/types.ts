@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           created_at: string
           duration: number
+          elevenlabs_conversation_id: string | null
           id: string
           recording_url: string | null
           scenario_id: string
@@ -22,6 +23,7 @@ export type Database = {
         Insert: {
           created_at?: string
           duration: number
+          elevenlabs_conversation_id?: string | null
           id?: string
           recording_url?: string | null
           scenario_id: string
@@ -31,6 +33,7 @@ export type Database = {
         Update: {
           created_at?: string
           duration?: number
+          elevenlabs_conversation_id?: string | null
           id?: string
           recording_url?: string | null
           scenario_id?: string
