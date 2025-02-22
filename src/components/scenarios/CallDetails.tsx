@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
@@ -12,6 +11,29 @@ interface CallDetailsProps {
   id?: string;
 }
 
+interface EvalCriteriaResult {
+  criterion: string;
+  passed: boolean;
+  explanation: string;
+}
+
+interface DataCollectionResult {
+  field: string;
+  value: string | null;
+}
+
+interface ConversationAnalysis {
+  transcript_summary?: string;
+  evaluation_criteria_results?: EvalCriteriaResult[];
+  data_collection_results?: DataCollectionResult[];
+}
+
+interface ConversationDetails {
+  id: string;
+  state: string;
+  analysis?: ConversationAnalysis;
+}
+
 interface CallRecord {
   id: string;
   scenario_id: string;
@@ -20,7 +42,7 @@ interface CallRecord {
   recording_url: string | null;
   created_at: string;
   elevenlabs_conversation_id: string | null;
-  conversation_details: any | null;
+  conversation_details: ConversationDetails | null;
   conversation_state: string | null;
   user_id: string | null;
   scenarios: {
@@ -149,15 +171,7 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
     }
   };
 
-  if (isLoading) {
-    return <div className="text-center py-8">Loading call details...</div>;
-  }
-
-  if (!call) {
-    return <div className="text-center py-8">Call not found</div>;
-  }
-
-  const renderCriteriaResults = (results: any[]) => {
+  const renderCriteriaResults = (results: EvalCriteriaResult[]) => {
     return results.map((result, index) => (
       <div key={index} className="flex items-start gap-2 p-3 bg-muted/30 rounded-md">
         {result.passed ? (
@@ -172,6 +186,14 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
       </div>
     ));
   };
+
+  if (isLoading) {
+    return <div className="text-center py-8">Loading call details...</div>;
+  }
+
+  if (!call) {
+    return <div className="text-center py-8">Call not found</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -251,7 +273,7 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
                 <div>
                   <h3 className="font-semibold text-lg mb-3">Data Collection Results</h3>
                   <div className="grid gap-3">
-                    {call.conversation_details.analysis.data_collection_results.map((result: any, index: number) => (
+                    {call.conversation_details.analysis.data_collection_results.map((result, index) => (
                       <div key={index} className="bg-muted/50 rounded-lg p-4">
                         <p className="font-medium mb-1">{result.field}</p>
                         <p className="text-sm">{result.value || 'Not collected'}</p>
