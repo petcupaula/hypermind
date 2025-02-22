@@ -52,7 +52,18 @@ const ChatInterface = () => {
         variant: "destructive",
       });
       setIsConnected(false);
-    }
+    },
+    overrides: {
+      agent: {
+        prompt: {
+          prompt: "You are an Enterprise CTO Persona, a tech-savvy decision maker at a Fortune 500 company. Help users understand our product offerings and make informed decisions.",
+        },
+        firstMessage: "Hello! I'm your Enterprise CTO advisor. How can I assist you with your technology decisions today?",
+      },
+      tts: {
+        voiceId: "pqHfZKP75CvOlQylNhV4", // Bill's voice
+      },
+    },
   });
 
   const startConversation = async () => {
