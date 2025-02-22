@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
@@ -10,6 +9,30 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface CallDetailsProps {
   id?: string;
+}
+
+interface CallRecord {
+  id: string;
+  scenario_id: string;
+  duration: number;
+  transcript: string | null;
+  recording_url: string | null;
+  created_at: string;
+  elevenlabs_conversation_id: string | null;
+  conversation_details: any | null;
+  conversation_state: string | null;
+  user_id: string | null;
+  scenarios: {
+    title: string;
+    description: string;
+    category: string;
+    difficulty: string;
+    persona: {
+      name: string;
+      role: string;
+      company: string;
+    };
+  };
 }
 
 const CallDetails = ({ id: propId }: CallDetailsProps) => {
@@ -64,7 +87,6 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) throw new Error('No active session');
 
-      // Fetch ElevenLabs conversation details
       const response = await fetch(`https://api.elevenlabs.io/v1/conversation/${call.elevenlabs_conversation_id}`, {
         headers: {
           'xi-api-key': import.meta.env.VITE_ELEVENLABS_API_KEY,
@@ -77,7 +99,6 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
 
       const conversationDetails = await response.json();
 
-      // Update the call_history record with the new details
       const { error: updateError } = await supabase
         .from('call_history')
         .update({

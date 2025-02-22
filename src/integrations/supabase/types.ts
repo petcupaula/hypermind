@@ -11,6 +11,8 @@ export type Database = {
     Tables: {
       call_history: {
         Row: {
+          conversation_details: Json | null
+          conversation_state: string | null
           created_at: string
           duration: number
           elevenlabs_conversation_id: string | null
@@ -21,6 +23,8 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          conversation_details?: Json | null
+          conversation_state?: string | null
           created_at?: string
           duration: number
           elevenlabs_conversation_id?: string | null
@@ -31,6 +35,8 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          conversation_details?: Json | null
+          conversation_state?: string | null
           created_at?: string
           duration?: number
           elevenlabs_conversation_id?: string | null

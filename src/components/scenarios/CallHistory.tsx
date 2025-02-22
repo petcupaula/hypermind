@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -19,6 +18,7 @@ interface CallRecord {
   elevenlabs_conversation_id: string | null;
   conversation_details: any | null;
   conversation_state: string | null;
+  user_id: string | null;
   scenarios: {
     title: string;
     description: string;
