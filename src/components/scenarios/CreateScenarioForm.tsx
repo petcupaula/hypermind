@@ -92,6 +92,30 @@ const CreateScenarioForm = () => {
 
       if (personaError) throw personaError;
 
+      // Generate avatar for the new persona
+      try {
+        const { data: avatarData, error: avatarError } = await supabase.functions
+          .invoke('generate-avatar', {
+            body: { appearance: formData.persona.appearance }
+          });
+
+        if (avatarError) {
+          console.error('Error generating avatar:', avatarError);
+        } else if (avatarData?.imageUrl) {
+          // Update the persona with the avatar URL
+          const { error: updateError } = await supabase
+            .from('personas')
+            .update({ avatar_url: avatarData.imageUrl })
+            .eq('id', personaData.id);
+
+          if (updateError) {
+            console.error('Error updating persona with avatar:', updateError);
+          }
+        }
+      } catch (avatarError) {
+        console.error('Error in avatar generation:', avatarError);
+      }
+
       const { error: scenarioError } = await supabase
         .from("scenarios")
         .insert({
