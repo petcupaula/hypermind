@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, Bot, Volume2, VolumeX } from "lucide-react";
 import { useConversation } from "@11labs/react";
@@ -11,11 +11,12 @@ const ChatInterface = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(1);
   const { toast } = useToast();
+  const conversationRef = useRef(null);
 
   // Initialize ElevenLabs conversation
   const conversation = useConversation({
     onConnect: () => {
-      console.log("Connected to ElevenLabs");
+      console.log("Connected to ElevenLabs - Setting up session...");
       setIsConnected(true);
       toast({
         title: "Connected",
@@ -23,18 +24,22 @@ const ChatInterface = () => {
       });
     },
     onDisconnect: () => {
-      console.log("Disconnected from ElevenLabs");
-      setIsConnected(false);
-      toast({
-        title: "Disconnected",
-        description: "Voice chat connection ended",
-      });
+      console.log("Disconnected from ElevenLabs - Cleaning up session...");
+      if (isConnected) {
+        setIsConnected(false);
+        toast({
+          title: "Disconnected",
+          description: "Voice chat connection ended",
+        });
+      }
     },
     onMessage: (message) => {
       console.log("Received message:", message);
       if (message.type === 'agent_response_started') {
+        console.log("Agent started speaking");
         setIsSpeaking(true);
       } else if (message.type === 'agent_response_ended') {
+        console.log("Agent finished speaking");
         setIsSpeaking(false);
       }
     },
@@ -42,9 +47,10 @@ const ChatInterface = () => {
       console.error("ElevenLabs error:", error);
       toast({
         title: "Error",
-        description: "Failed to establish voice chat connection",
+        description: error?.message || "Failed to establish voice chat connection",
         variant: "destructive",
       });
+      setIsConnected(false);
     },
     overrides: {
       agent: {
@@ -62,15 +68,20 @@ const ChatInterface = () => {
 
   const startConversation = async () => {
     try {
-      console.log("Starting conversation...");
+      console.log("Starting conversation - Requesting microphone access...");
       
       // Request microphone access before starting
-      await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log("Microphone access granted", stream.active);
       
       // Start the conversation with your agent ID
+      console.log("Initiating ElevenLabs session...");
       await conversation.startSession({
         agentId: "IFTHFHzCj8SPqmuq1gSq",
       });
+      
+      conversationRef.current = conversation;
+      console.log("Session started successfully");
       
     } catch (error) {
       console.error("Error starting conversation:", error);
@@ -79,28 +90,35 @@ const ChatInterface = () => {
         description: "Failed to start voice chat. Please ensure microphone access is allowed.",
         variant: "destructive",
       });
+      setIsConnected(false);
     }
   };
 
   const stopConversation = () => {
-    console.log("Stopping conversation...");
-    conversation.endSession();
+    console.log("Manually stopping conversation...");
+    if (conversationRef.current) {
+      conversationRef.current.endSession();
+    }
   };
 
   const toggleMute = () => {
     const newVolume = isMuted ? 1 : 0;
     setIsMuted(!isMuted);
     setVolume(newVolume);
-    conversation.setVolume({ volume: newVolume });
+    if (conversationRef.current) {
+      conversationRef.current.setVolume({ volume: newVolume });
+    }
   };
 
   useEffect(() => {
+    // Cleanup function
     return () => {
-      if (isConnected) {
-        conversation.endSession();
+      console.log("Component unmounting, cleaning up conversation...");
+      if (conversationRef.current) {
+        conversationRef.current.endSession();
       }
     };
-  }, [isConnected, conversation]);
+  }, []);
 
   return (
     <div className="w-full max-w-3xl mx-auto bg-white/50 backdrop-blur-lg rounded-2xl border border-gray-200 shadow-lg">
