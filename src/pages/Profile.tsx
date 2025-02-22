@@ -60,8 +60,9 @@ const Profile = () => {
       if (error) throw error;
       return formData;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
+    onSuccess: (data) => {
+      // Update the cache with the new profile data
+      queryClient.setQueryData(["profile"], data);
       toast({
         title: "Profile updated",
         description: "Your account has been successfully updated.",
@@ -88,16 +89,19 @@ const Profile = () => {
     e.preventDefault();
     const form = e.currentTarget;
     const formData = new FormData(form);
+    
+    // Create the updated profile object while preserving existing data
     const updatedProfile = {
       ...profile,
-      name: formData.get("name") as string,
-      company: formData.get("company") as string,
-      role: formData.get("role") as string,
-      product_name: formData.get("product_name") as string,
+      name: formData.get("name") as string || profile?.name,
+      company: formData.get("company") as string || profile?.company,
+      role: formData.get("role") as string || profile?.role,
+      product_name: formData.get("product_name") as string || profile?.product_name,
       industry: form.querySelector('#industry')?.getAttribute('data-value') || profile?.industry,
       target_market: form.querySelector('#target_market')?.getAttribute('data-value') || profile?.target_market,
-      description: formData.get("description") as string,
+      description: formData.get("description") as string || profile?.description,
     };
+    
     updateProfile.mutate(updatedProfile);
   };
 
