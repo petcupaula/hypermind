@@ -61,7 +61,7 @@ const Navigation = () => {
         <div className="flex items-center space-x-4">
           {session ? (
             <>
-              <Link to="/dashboard">
+              <Link to="/scenarios">
                 <Button variant="ghost" size="sm">Scenarios</Button>
               </Link>
               <Button 
