@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
@@ -103,7 +102,6 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
       const data = await response.json();
       const analysis = data.analysis || {};
 
-      // Update the call record with the new analysis data
       const { error: updateError } = await supabase
         .from('call_history')
         .update({
@@ -155,8 +153,11 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
     }
   };
 
-  const renderCriteriaResults = (results: EvalCriteriaResult[]) => {
-    return results.map((result, index) => (
+  const renderCriteriaResults = (results: unknown) => {
+    const typedResults = results as EvalCriteriaResult[];
+    if (!Array.isArray(typedResults)) return null;
+    
+    return typedResults.map((result, index) => (
       <div key={index} className="flex items-start gap-2 p-3 bg-muted/30 rounded-md">
         {result.passed ? (
           <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
@@ -246,7 +247,7 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
             <div>
               <h3 className="font-semibold text-lg mb-3">Evaluation Criteria</h3>
               <div className="space-y-3">
-                {renderCriteriaResults(call.evaluation_criteria_results as EvalCriteriaResult[])}
+                {renderCriteriaResults(call.evaluation_criteria_results)}
               </div>
             </div>
           )}

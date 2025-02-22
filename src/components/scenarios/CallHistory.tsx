@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -6,18 +5,9 @@ import { Calendar, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import type { Database } from "@/integrations/supabase/types";
 
-interface CallRecord {
-  id: string;
-  scenario_id: string;
-  duration: number;
-  transcript: string | null;
-  recording_url: string | null;
-  created_at: string;
-  elevenlabs_conversation_id: string | null;
-  conversation_details: any | null;
-  conversation_state: string | null;
-  user_id: string | null;
+type CallRecord = Database["public"]["Tables"]["call_history"]["Row"] & {
   scenarios: {
     title: string;
     description: string;
@@ -29,7 +19,7 @@ interface CallRecord {
       company: string;
     };
   };
-}
+};
 
 const CallHistory = () => {
   const navigate = useNavigate();
