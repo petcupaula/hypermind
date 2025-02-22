@@ -19,24 +19,26 @@ export function ProfileSection({ profile, isEditing, onAvatarChange, avatarFile 
           <div className="flex items-center gap-6">
             <Avatar className="w-20 h-20">
               <AvatarImage 
-                src={avatarFile ? URL.createObjectURL(avatarFile) : profile?.avatar_url} 
+                src={avatarFile ? URL.createObjectURL(avatarFile) : 
+                  profile?.avatar_url ? `https://qexrcglzhrqrfxxcahll.supabase.co/storage/v1/object/public/avatars/${profile.avatar_url}` : undefined} 
                 alt={profile?.name} 
               />
               <AvatarFallback>{profile?.name?.charAt(0) || 'U'}</AvatarFallback>
             </Avatar>
-            <div className="flex-1">
-              <Label htmlFor="avatar" className="text-sm font-medium">
-                Profile Picture
-              </Label>
-              <Input
-                id="avatar"
-                type="file"
-                accept="image/*"
-                onChange={onAvatarChange}
-                disabled={!isEditing}
-                className="mt-1"
-              />
-            </div>
+            {isEditing && (
+              <div className="flex-1">
+                <Label htmlFor="avatar" className="text-sm font-medium">
+                  Profile Picture
+                </Label>
+                <Input
+                  id="avatar"
+                  type="file"
+                  accept="image/*"
+                  onChange={onAvatarChange}
+                  className="mt-1"
+                />
+              </div>
+            )}
           </div>
 
           <div className="grid gap-2">
