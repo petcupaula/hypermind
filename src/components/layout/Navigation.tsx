@@ -62,6 +62,7 @@ const Navigation = () => {
               <>
                 <Link to="/scenarios" className="text-sm text-gray-600 hover:text-gray-900">Scenarios</Link>
                 <Link to="/history" className="text-sm text-gray-600 hover:text-gray-900">Call History</Link>
+                <Link to="/profile" className="text-sm text-gray-600 hover:text-gray-900">Profile</Link>
               </>
             )}
           </div>
