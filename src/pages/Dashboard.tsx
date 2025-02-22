@@ -89,14 +89,14 @@ const Dashboard = () => {
                     <Button
                       key={category}
                       variant={selectedCategory === category ? "secondary" : "ghost"}
-                      className={`w-full justify-start text-left font-medium ${
+                      className={`w-full justify-start text-left font-medium px-3 py-2 h-auto whitespace-normal ${
                         selectedCategory === category 
                           ? "bg-primary text-primary-foreground hover:bg-primary/90" 
                           : "hover:bg-secondary"
                       }`}
                       onClick={() => setSelectedCategory(category)}
                     >
-                      {category}
+                      <span className="line-clamp-2">{category}</span>
                     </Button>
                   ))}
                 </div>
