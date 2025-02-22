@@ -90,14 +90,24 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) throw new Error('No active session');
 
+      const apiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
+      if (!apiKey) {
+        throw new Error('ElevenLabs API key is not configured');
+      }
+
+      console.log('Making ElevenLabs API call with API key present:', !!apiKey);
+
       const response = await fetch(`https://api.elevenlabs.io/v1/convai/conversations/${call.elevenlabs_conversation_id}`, {
         headers: {
-          'xi-api-key': import.meta.env.VITE_ELEVENLABS_API_KEY,
+          'xi-api-key': apiKey,
         },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch ElevenLabs conversation details');
+        if (response.status === 401) {
+          throw new Error('Invalid or missing ElevenLabs API key');
+        }
+        throw new Error(`Failed to fetch ElevenLabs conversation details: ${response.status}`);
       }
 
       const data = await response.json();
@@ -128,7 +138,7 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
       console.error('Error fetching ElevenLabs details:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch conversation details",
+        description: error instanceof Error ? error.message : "Failed to fetch conversation details",
         variant: "destructive",
       });
     },
