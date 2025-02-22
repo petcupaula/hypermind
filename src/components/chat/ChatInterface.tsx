@@ -127,15 +127,25 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   return (
     <div className="w-full max-w-3xl mx-auto bg-white/50 backdrop-blur-lg rounded-2xl border border-gray-200 shadow-lg">
       <div className="border-b p-4">
-        <div className="flex items-center">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/10 p-2 rounded-lg">
-              <Bot className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-medium">{scenario.title}</h3>
-              <p className="text-sm text-gray-500">{scenario.description}</p>
-            </div>
+        <div className="flex items-center gap-4">
+          <div className="bg-primary/10 p-2 rounded-lg">
+            <Bot className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-medium">{scenario.title}</h3>
+            <p className="text-sm text-gray-500 mb-2">{scenario.description}</p>
+            {scenario.persona.name && (
+              <div className="flex items-center gap-2 mt-2">
+                <div className="text-sm">
+                  <span className="font-medium">{scenario.persona.name}</span>
+                  {scenario.persona.role && scenario.persona.company && (
+                    <span className="text-gray-600">
+                      {" "}• {scenario.persona.role} at {scenario.persona.company}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
