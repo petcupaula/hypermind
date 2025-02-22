@@ -21,6 +21,8 @@ const DEFAULT_CATEGORIES = [
   "Closing Deals",
 ] as const;
 
+type Category = typeof DEFAULT_CATEGORIES[number] | string;
+
 const CreateScenarioForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -29,7 +31,7 @@ const CreateScenarioForm = () => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    category: DEFAULT_CATEGORIES[0],
+    category: DEFAULT_CATEGORIES[0] as Category,
     difficulty: "Beginner" as typeof DIFFICULTY_OPTIONS[number],
     persona: {
       name: "",
@@ -50,8 +52,7 @@ const CreateScenarioForm = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('scenarios')
-        .select('category')
-        .distinct();
+        .select('category');
       
       if (error) {
         console.error('Error fetching categories:', error);
@@ -156,7 +157,7 @@ const CreateScenarioForm = () => {
                 className="flex-1 rounded-md border border-input bg-background px-3 py-2"
                 value={formData.category}
                 onChange={(e) => {
-                  setFormData(prev => ({ ...prev, category: e.target.value }));
+                  setFormData(prev => ({ ...prev, category: e.target.value as Category }));
                   setCustomCategory("");
                 }}
               >
@@ -172,7 +173,7 @@ const CreateScenarioForm = () => {
                 onChange={(e) => {
                   setCustomCategory(e.target.value);
                   if (e.target.value) {
-                    setFormData(prev => ({ ...prev, category: "" }));
+                    setFormData(prev => ({ ...prev, category: e.target.value }));
                   }
                 }}
                 className="flex-1"
