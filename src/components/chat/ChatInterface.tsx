@@ -15,7 +15,7 @@ const ChatInterface = () => {
 
   // Initialize ElevenLabs conversation
   const conversation = useConversation({
-    api_key: process.env.ELEVENLABS_API_KEY, // This should be set in your environment variables
+    api_key: import.meta.env.VITE_ELEVENLABS_API_KEY, // Using Vite's env variable syntax
     onConnect: () => {
       console.log("Connected to ElevenLabs - Setting up session...");
       setIsConnected(true);
