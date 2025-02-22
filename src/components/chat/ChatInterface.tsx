@@ -2,28 +2,58 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Bot } from "lucide-react";
+import { Send, Bot, Volume2, VolumeX } from "lucide-react";
+import { useConversation } from "@11labs/react";
 
 const ChatInterface = () => {
   const [message, setMessage] = useState("");
+  const [isMuted, setIsMuted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Initialize ElevenLabs conversation
+  const conversation = useConversation({
+    apiKey: process.env.ELEVENLABS_API_KEY,
+    voiceId: "CwhRBWXzGAHq8TQ4Fs17", // Using Roger voice
+    model: "eleven_turbo_v2",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Handle message submission
     setMessage("");
   };
 
+  const toggleMute = async () => {
+    if (conversation.isSpeaking) {
+      await conversation.setVolume({ volume: isMuted ? 1 : 0 });
+      setIsMuted(!isMuted);
+    }
+  };
+
   return (
     <div className="w-full max-w-3xl mx-auto bg-white/50 backdrop-blur-lg rounded-2xl border border-gray-200 shadow-lg">
       <div className="border-b p-4">
-        <div className="flex items-center gap-3">
-          <div className="bg-primary/10 p-2 rounded-lg">
-            <Bot className="h-5 w-5 text-primary" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-primary/10 p-2 rounded-lg">
+              <Bot className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-medium">Enterprise CTO Persona</h3>
+              <p className="text-sm text-gray-500">Tech-savvy decision maker at a Fortune 500 company</p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-medium">Enterprise CTO Persona</h3>
-            <p className="text-sm text-gray-500">Tech-savvy decision maker at a Fortune 500 company</p>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleMute}
+            className={conversation.isSpeaking ? "opacity-100" : "opacity-50"}
+          >
+            {isMuted ? (
+              <VolumeX className="h-5 w-5" />
+            ) : (
+              <Volume2 className="h-5 w-5" />
+            )}
+          </Button>
         </div>
       </div>
       
