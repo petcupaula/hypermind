@@ -69,7 +69,7 @@ const VOICE_OPTIONS = [
   },
 ] as const;
 
-type VoiceId = typeof VOICE_OPTIONS[number]["id"] | string;
+type VoiceId = typeof VOICE_OPTIONS[number]["id"];
 type Category = typeof DEFAULT_CATEGORIES[number] | string;
 
 const CreateScenarioForm = () => {
@@ -79,7 +79,6 @@ const CreateScenarioForm = () => {
   const [customCategory, setCustomCategory] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
-  const [customVoiceId, setCustomVoiceId] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -419,52 +418,33 @@ const CreateScenarioForm = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="personaVoice">Voice</Label>
-                <div className="flex flex-col gap-4">
+                <div className="flex gap-2">
                   <select
                     id="personaVoice"
                     className="w-full rounded-md border border-input bg-background px-3 py-2"
                     value={formData.persona.voiceId}
                     onChange={(e) => {
-                      const newVoiceId = e.target.value as VoiceId;
                       setFormData(prev => ({
                         ...prev,
-                        persona: { ...prev.persona, voiceId: newVoiceId }
+                        persona: { ...prev.persona, voiceId: e.target.value as VoiceId }
                       }));
-                      setCustomVoiceId("");
                     }}
                   >
                     {VOICE_OPTIONS.map((voice) => (
                       <option key={voice.id} value={voice.id}>
-                        {voice.name} ({voice.id})
+                        {voice.name}
                       </option>
                     ))}
                   </select>
-
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Or enter custom voice ID"
-                      value={customVoiceId}
-                      onChange={(e) => {
-                        setCustomVoiceId(e.target.value);
-                        if (e.target.value) {
-                          setFormData(prev => ({
-                            ...prev,
-                            persona: { ...prev.persona, voiceId: e.target.value }
-                          }));
-                        }
-                      }}
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={previewVoice}
-                      className="min-w-[100px]"
-                    >
-                      {isPlaying ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                      {isPlaying ? "Stop" : "Preview"}
-                    </Button>
-                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={previewVoice}
+                    className="min-w-[100px]"
+                  >
+                    {isPlaying ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    {isPlaying ? "Stop" : "Preview"}
+                  </Button>
                 </div>
               </div>
             </div>
