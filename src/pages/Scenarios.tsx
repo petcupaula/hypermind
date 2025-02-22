@@ -6,14 +6,17 @@ import AnimatedGradient from "@/components/ui/animated-gradient";
 import Navigation from "@/components/layout/Navigation";
 import ChatInterface from "@/components/chat/ChatInterface";
 import ScenarioCard, { Scenario } from "@/components/scenarios/ScenarioCard";
+import CreateScenarioForm from "@/components/scenarios/CreateScenarioForm";
 import GenerateAvatars from "@/components/scenarios/GenerateAvatars";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
 const Dashboard = () => {
   const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [isCreating, setIsCreating] = useState(false);
   const [session, setSession] = useState<any>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -126,6 +129,17 @@ const Dashboard = () => {
             </Button>
             <ChatInterface scenario={selectedScenario} />
           </div>
+        ) : isCreating ? (
+          <div className="max-w-3xl mx-auto">
+            <Button 
+              variant="ghost" 
+              className="mb-8"
+              onClick={() => setIsCreating(false)}
+            >
+              ← Back to scenarios
+            </Button>
+            <CreateScenarioForm />
+          </div>
         ) : (
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
@@ -135,7 +149,16 @@ const Dashboard = () => {
               <p className="text-xl text-gray-600 mb-8">
                 Choose a scenario to practice your sales skills with different customer personas
               </p>
-              <GenerateAvatars />
+              <div className="flex justify-center gap-4 mb-8">
+                <GenerateAvatars />
+                <Button 
+                  onClick={() => setIsCreating(true)}
+                  className="gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Create New Scenario
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-12 gap-8">
