@@ -19,9 +19,21 @@ interface EvalCriteriaResult {
   explanation: string;
 }
 
-interface DataCollectionResult {
-  field: string;
-  value: string | null;
+interface DataCollectionSchema {
+  type: string;
+  description: string;
+  dynamic_variable: string;
+}
+
+interface DataCollectionItem {
+  value: boolean | number | null;
+  rationale: string;
+  json_schema: DataCollectionSchema | null;
+  data_collection_id: string;
+}
+
+type DataCollectionResults = {
+  [key: string]: DataCollectionItem;
 }
 
 interface EvaluationResult {
@@ -286,13 +298,27 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
   };
 
   const renderDataCollectionResults = (results: unknown) => {
-    const typedResults = results as DataCollectionResult[];
-    if (!Array.isArray(typedResults)) return null;
+    const typedResults = results as DataCollectionResults;
+    if (!typedResults || typeof typedResults !== 'object') return null;
 
-    return typedResults.map((result, index) => (
-      <div key={index} className="bg-muted/50 rounded-lg p-4">
-        <div className="font-medium mb-1">{result.field}</div>
-        <div className="text-sm">{result.value || 'Not collected'}</div>
+    return Object.entries(typedResults).map(([key, result]) => (
+      <div key={key} className="bg-muted/50 rounded-lg p-4">
+        <div className="font-medium mb-2 capitalize">{key.replace(/_/g, ' ')}</div>
+        <div className="space-y-2">
+          <div className="text-sm font-medium">
+            Value: {result.value === null ? 'Not collected' : 
+                     typeof result.value === 'boolean' ? (result.value ? 'Yes' : 'No') : 
+                     result.value}
+          </div>
+          {result.json_schema?.description && (
+            <div className="text-sm text-muted-foreground italic">
+              {result.json_schema.description}
+            </div>
+          )}
+          <div className="text-sm text-muted-foreground">
+            {result.rationale}
+          </div>
+        </div>
       </div>
     ));
   };
