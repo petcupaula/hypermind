@@ -171,14 +171,17 @@ const CreateScenarioForm = () => {
       setIsPlaying(true);
       
       const apiKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
+      console.log("API Key exists:", !!apiKey); // Debug log
       
       if (!apiKey) {
-        throw new Error("ElevenLabs API key not found");
+        throw new Error("ElevenLabs API key not found. Please make sure you've added your API key in the project settings.");
       }
 
       if (!formData.persona.voiceId) {
         throw new Error("No voice ID selected");
       }
+
+      console.log("Making request to ElevenLabs API..."); // Debug log
 
       const response = await fetch("https://api.elevenlabs.io/v1/text-to-speech/" + formData.persona.voiceId, {
         method: "POST",
