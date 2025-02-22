@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, Bot } from "lucide-react";
@@ -26,6 +25,12 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   const transformImageUrl = (url: string) => {
     if (!url) return url;
     return `${url}?width=300&height=300&resize=contain`;
+  };
+
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
   const conversation = useConversation({
@@ -176,7 +181,6 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
         setDuration(prev => prev + 1);
       }, 1000);
 
-      // Start recording
       navigator.mediaDevices.getUserMedia({ audio: true })
         .then(stream => {
           const mediaRecorder = new MediaRecorder(stream);
@@ -189,7 +193,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
             }
           };
 
-          mediaRecorder.start(1000); // Collect data every second
+          mediaRecorder.start(1000);
           console.log('Started recording audio');
         })
         .catch(error => {
