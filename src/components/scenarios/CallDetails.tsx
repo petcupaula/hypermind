@@ -372,12 +372,7 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <button 
-                            type="button" 
-                            className="focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full"
-                          >
-                            <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                          </button>
+                          <Info className="h-4 w-4 text-muted-foreground cursor-help" />
                         </TooltipTrigger>
                         <TooltipContent className="max-w-[300px]">
                           {result.json_schema.description}
