@@ -1,12 +1,11 @@
-import { useState } from "react";
+
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Play, Calendar, Clock } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Calendar, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import CallDetails from "./CallDetails";
 
 interface CallRecord {
   id: string;
@@ -33,8 +32,7 @@ interface CallRecord {
 }
 
 const CallHistory = () => {
-  const [selectedCallId, setSelectedCallId] = useState<string | null>(null);
-  const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const { data: calls = [], isLoading } = useQuery({
@@ -85,26 +83,6 @@ const CallHistory = () => {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const playAudio = async (recordingUrl: string, callId: string) => {
-    try {
-      const audio = new Audio(recordingUrl);
-      audio.addEventListener('ended', () => setPlayingAudioId(null));
-      await audio.play();
-      setPlayingAudioId(callId);
-    } catch (error) {
-      console.error('Error playing audio:', error);
-      toast({
-        title: "Error",
-        description: "Failed to play recording",
-        variant: "destructive",
-      });
-    }
-  };
-
-  if (selectedCallId) {
-    return <CallDetails id={selectedCallId} />;
-  }
-
   if (isLoading) {
     return <div className="text-center py-8">Loading call history...</div>;
   }
@@ -125,7 +103,7 @@ const CallHistory = () => {
         <Card 
           key={call.id} 
           className="bg-card/50 backdrop-blur hover:bg-card/70 transition-colors cursor-pointer"
-          onClick={() => setSelectedCallId(call.id)}
+          onClick={() => navigate(`/calls/${call.id}`)}
         >
           <CardHeader>
             <div className="flex items-start justify-between">
@@ -159,23 +137,6 @@ const CallHistory = () => {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            {call.recording_url && (
-              <Button
-                variant="secondary"
-                size="sm"
-                className="gap-2"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  playAudio(call.recording_url!, call.id);
-                }}
-                disabled={playingAudioId === call.id}
-              >
-                <Play className="h-4 w-4" />
-                {playingAudioId === call.id ? 'Playing...' : 'Play Recording'}
-              </Button>
-            )}
-          </CardContent>
         </Card>
       ))}
     </div>
