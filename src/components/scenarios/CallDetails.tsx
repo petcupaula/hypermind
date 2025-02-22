@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, ArrowLeft, RefreshCcw, Calendar, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { Play, ArrowLeft, RefreshCcw, Calendar, Clock, CheckCircle2, XCircle, Pause } from "lucide-react";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -44,6 +44,8 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [activeAudio, setActiveAudio] = useState<HTMLAudioElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const { data: call, isLoading } = useQuery({
     queryKey: ['call-details', id],
@@ -204,10 +206,37 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const playAudio = async (recordingUrl: string) => {
+  const handleAudio = async (recordingUrl: string) => {
     try {
+      if (activeAudio) {
+        if (activeAudio.src === recordingUrl) {
+          // Toggle play/pause for the same audio
+          if (isPlaying) {
+            activeAudio.pause();
+            setIsPlaying(false);
+          } else {
+            await activeAudio.play();
+            setIsPlaying(true);
+          }
+          return;
+        } else {
+          // Stop previous audio if playing a different one
+          activeAudio.pause();
+          activeAudio.currentTime = 0;
+          setActiveAudio(null);
+          setIsPlaying(false);
+        }
+      }
+
+      // Create and play new audio
       const audio = new Audio(recordingUrl);
+      audio.addEventListener('ended', () => {
+        setIsPlaying(false);
+      });
+      
       await audio.play();
+      setActiveAudio(audio);
+      setIsPlaying(true);
     } catch (error) {
       console.error('Error playing audio:', error);
       toast({
@@ -217,6 +246,15 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
       });
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (activeAudio) {
+        activeAudio.pause();
+        activeAudio.currentTime = 0;
+      }
+    };
+  }, [activeAudio]);
 
   const renderCriteriaResults = (results: unknown) => {
     const typedResults = results as EvalCriteriaResult[];
@@ -354,21 +392,27 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
                 {call.recording_url && (
                   <Button
                     variant="secondary"
-                    onClick={() => playAudio(call.recording_url!)}
-                    className="gap-2"
+                    onClick={() => handleAudio(call.recording_url!)}
+                    className="gap-2 min-w-[200px] justify-start"
                   >
-                    <Play className="h-4 w-4" />
-                    Play Local Recording
+                    {isPlaying && activeAudio?.src === call.recording_url ? (
+                      <><Pause className="h-4 w-4" /> Pause Local Recording</>
+                    ) : (
+                      <><Play className="h-4 w-4" /> Play Local Recording</>
+                    )}
                   </Button>
                 )}
                 {call.elevenlabs_recording_url && (
                   <Button
                     variant="secondary"
-                    onClick={() => playAudio(call.elevenlabs_recording_url!)}
-                    className="gap-2"
+                    onClick={() => handleAudio(call.elevenlabs_recording_url!)}
+                    className="gap-2 min-w-[200px] justify-start"
                   >
-                    <Play className="h-4 w-4" />
-                    Play ElevenLabs Recording
+                    {isPlaying && activeAudio?.src === call.elevenlabs_recording_url ? (
+                      <><Pause className="h-4 w-4" /> Pause ElevenLabs Recording</>
+                    ) : (
+                      <><Play className="h-4 w-4" /> Play ElevenLabs Recording</>
+                    )}
                   </Button>
                 )}
               </div>
