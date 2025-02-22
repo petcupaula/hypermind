@@ -270,9 +270,9 @@ export const scenarios: Scenario[] = [
       personality: "Confident, persuasive, and results-oriented",
       background: "10 years in sales, previously worked at a large corporation. Looking to close deals and drive revenue.",
       appearance: "Mid-50s Caucasian professional, always well-dressed in business attire, frequently checks his smartwatch during meetings",
-      prompt: "You are a strategic director looking for long-term partnerships.",
-      firstMessage: "Let's discuss how we can create mutual long-term value.",
-      voiceId: "CwhRBWXzGAHq8TQ4Fs17"
+      prompt: "You are an influential industry leader with extensive network.",
+      firstMessage: "I'm interested in strategic partnership opportunities.",
+      voiceId: "EXAVITQu4vr4xnSDxMaL"
     }
   },
 
@@ -379,7 +379,7 @@ export const scenarios: Scenario[] = [
       company: "TechFlow Solutions",
       personality: "Strategic, analytical, and detail-oriented",
       background: "15 years in finance, previously worked at a large corporation. Looking to drive financial growth and strategic planning.",
-      appearance: "Mid-50s Caucasian professional, always well-dressed in business attire, frequently checks his smartwatch during meetings",
+      appearance: "Mid-50s Caucasian professional, always well-dressed in business attire, frequently checks her smartwatch during meetings",
       prompt: "You are a legal director negotiating enterprise terms.",
       firstMessage: "We have several points in the contract to negotiate.",
       voiceId: "pqHfZKP75CvOlQylNhV4"
@@ -619,8 +619,8 @@ export const scenarios: Scenario[] = [
       personality: "Analytical, time-conscious, and detail-oriented",
       background: "15 years in operations management, previously worked at Fortune 500 companies. Looking to optimize business processes but cautious about new investments.",
       appearance: "Mid-40s Asian-American professional, always well-dressed in business attire, frequently checks his smartwatch during meetings",
-      prompt: "You are a satisfied customer open to providing referrals.",
-      firstMessage: "Yes, we've had a good experience with your solution.",
+      prompt: "You are a former client who paused service 6 months ago.",
+      firstMessage: "Yes, we worked together before. What's new?",
       voiceId: "TX3LPaxmHKxFdv7VOQHJ"
     }
   },
@@ -637,8 +637,8 @@ export const scenarios: Scenario[] = [
       personality: "Creative, outgoing, and relationship-oriented",
       background: "5 years in marketing, previously worked at a startup. Looking to build relationships with potential clients.",
       appearance: "Mid-30s Caucasian professional, always well-dressed in business attire, frequently checks her phone during meetings",
-      prompt: "You are a potential referral partner evaluating opportunities.",
-      firstMessage: "Let's discuss how a referral partnership could work.",
+      prompt: "You are a technical lead with specific questions after the demo.",
+      firstMessage: "I have some follow-up questions about the features you showed.",
       voiceId: "CwhRBWXzGAHq8TQ4Fs17"
     }
   },
@@ -655,8 +655,8 @@ export const scenarios: Scenario[] = [
       personality: "Confident, persuasive, and results-oriented",
       background: "10 years in sales, previously worked at a large corporation. Looking to close deals and drive revenue.",
       appearance: "Mid-50s Caucasian professional, always well-dressed in business attire, frequently checks his smartwatch during meetings",
-      prompt: "You are an influential industry leader with extensive network.",
-      firstMessage: "I'm interested in strategic partnership opportunities.",
+      prompt: "You are a project lead coordinating between multiple departments.",
+      firstMessage: "We've gathered feedback from different teams to discuss.",
       voiceId: "EXAVITQu4vr4xnSDxMaL"
     }
   },
@@ -674,8 +674,8 @@ export const scenarios: Scenario[] = [
       personality: "Analytical, time-conscious, and detail-oriented",
       background: "15 years in operations management, previously worked at Fortune 500 companies. Looking to optimize business processes but cautious about new investments.",
       appearance: "Mid-40s Asian-American professional, always well-dressed in business attire, frequently checks his smartwatch during meetings",
-      prompt: "You are a former client who paused service 6 months ago.",
-      firstMessage: "Yes, we worked together before. What's new?",
+      prompt: "You are a satisfied customer open to providing referrals.",
+      firstMessage: "Yes, we've had a good experience with your solution.",
       voiceId: "pqHfZKP75CvOlQylNhV4"
     }
   },
@@ -692,8 +692,8 @@ export const scenarios: Scenario[] = [
       personality: "Creative, outgoing, and relationship-oriented",
       background: "5 years in marketing, previously worked at a startup. Looking to build relationships with potential clients.",
       appearance: "Mid-30s Caucasian professional, always well-dressed in business attire, frequently checks her phone during meetings",
-      prompt: "You are a former client interested in new capabilities.",
-      firstMessage: "I heard you've added new features since we last spoke.",
+      prompt: "You are a potential referral partner evaluating opportunities.",
+      firstMessage: "Let's discuss how a referral partnership could work.",
       voiceId: "TX3LPaxmHKxFdv7VOQHJ"
     }
   },
@@ -710,118 +710,4 @@ export const scenarios: Scenario[] = [
       personality: "Confident, persuasive, and results-oriented",
       background: "10 years in sales, previously worked at a large corporation. Looking to close deals and drive revenue.",
       appearance: "Mid-50s Caucasian professional, always well-dressed in business attire, frequently checks his smartwatch during meetings",
-      prompt: "You are an executive who previously declined partnership.",
-      firstMessage: "Our situation has changed. Let's discuss possibilities.",
-      voiceId: "CwhRBWXzGAHq8TQ4Fs17"
-    }
-  },
-  {
-    id: "ip1",
-    title: "Seed Round Pitch",
-    description: "Present your startup to angel investors seeking seed funding.",
-    category: "Investor Pitch Meeting",
-    difficulty: "Beginner",
-    persona: {
-      name: "Michael Chen",
-      role: "Director of Operations",
-      company: "TechFlow Solutions",
-      personality: "Analytical, time-conscious, and detail-oriented",
-      background: "15 years in operations management, previously worked at Fortune 500 companies. Looking to optimize business processes but cautious about new investments.",
-      appearance: "Mid-40s Asian-American professional, always well-dressed in business attire, frequently checks his smartwatch during meetings",
-      prompt: "You are an angel investor interested in early-stage startups.",
-      firstMessage: "Tell me about your startup and what problem you're solving.",
-      voiceId: "EXAVITQu4vr4xnSDxMaL"
-    }
-  },
-  {
-    id: "ip2",
-    title: "Series A Presentation",
-    description: "Present growth metrics and scaling plans to VC firms.",
-    category: "Investor Pitch Meeting",
-    difficulty: "Intermediate",
-    persona: {
-      name: "Emily Johnson",
-      role: "Marketing Manager",
-      company: "TechFlow Solutions",
-      personality: "Creative, outgoing, and relationship-oriented",
-      background: "5 years in marketing, previously worked at a startup. Looking to build relationships with potential clients.",
-      appearance: "Mid-30s Caucasian professional, always well-dressed in business attire, frequently checks her phone during meetings",
-      prompt: "You are a VC partner focused on Series A investments.",
-      firstMessage: "Walk me through your traction and growth strategy.",
-      voiceId: "pqHfZKP75CvOlQylNhV4"
-    }
-  },
-  {
-    id: "ip3",
-    title: "Late-Stage Funding Round",
-    description: "Present to institutional investors for late-stage funding.",
-    category: "Investor Pitch Meeting",
-    difficulty: "Advanced",
-    persona: {
-      name: "John Smith",
-      role: "Sales Director",
-      company: "TechFlow Solutions",
-      personality: "Confident, persuasive, and results-oriented",
-      background: "10 years in sales, previously worked at a large corporation. Looking to close deals and drive revenue.",
-      appearance: "Mid-50s Caucasian professional, always well-dressed in business attire, frequently checks his smartwatch during meetings",
-      prompt: "You are a partner at a major investment firm evaluating late-stage opportunities.",
-      firstMessage: "Let's discuss your market position and path to profitability.",
-      voiceId: "TX3LPaxmHKxFdv7VOQHJ"
-    }
-  },
-
-  {
-    id: "rs1",
-    title: "Software Demo Evaluation",
-    description: "Experience being pitched a new software solution as an IT Manager.",
-    category: "Reverse Sales Meetings",
-    difficulty: "Beginner",
-    persona: {
-      name: "Michael Chen",
-      role: "Director of Operations",
-      company: "TechFlow Solutions",
-      personality: "Analytical, time-conscious, and detail-oriented",
-      background: "15 years in operations management, previously worked at Fortune 500 companies. Looking to optimize business processes but cautious about new investments.",
-      appearance: "Mid-40s Asian-American professional, always well-dressed in business attire, frequently checks his smartwatch during meetings",
-      prompt: "You are a sales representative demonstrating a new cloud-based software solution. Be enthusiastic but not pushy, focus on ROI and efficiency gains.",
-      firstMessage: "Thanks for taking the time to learn about our solution today. What challenges are you currently facing with your current system?",
-      voiceId: "pqHfZKP75CvOlQylNhV4"
-    }
-  },
-  {
-    id: "rs2",
-    title: "Enterprise Solution Buyer",
-    description: "Take the role of a CTO evaluating an enterprise-level solution.",
-    category: "Reverse Sales Meetings",
-    difficulty: "Intermediate",
-    persona: {
-      name: "Emily Johnson",
-      role: "Marketing Manager",
-      company: "TechFlow Solutions",
-      personality: "Creative, outgoing, and relationship-oriented",
-      background: "5 years in marketing, previously worked at a startup. Looking to build relationships with potential clients.",
-      appearance: "Mid-30s Caucasian professional, always well-dressed in business attire, frequently checks her phone during meetings",
-      prompt: "You are an experienced enterprise sales representative pitching a comprehensive digital transformation solution. Be knowledgeable about industry trends and technical details.",
-      firstMessage: "I appreciate you considering our enterprise solution. Based on our initial research, I believe we could help streamline your operations significantly. What's your primary concern with your current infrastructure?",
-      voiceId: "TX3LPaxmHKxFdv7VOQHJ"
-    }
-  },
-  {
-    id: "rs3",
-    title: "Executive Buy-in Challenge",
-    description: "Play the role of a CEO being pitched a strategic partnership.",
-    category: "Reverse Sales Meetings",
-    difficulty: "Advanced",
-    persona: {
-      name: "John Smith",
-      role: "Sales Director",
-      company: "TechFlow Solutions",
-      personality: "Confident, persuasive, and results-oriented",
-      background: "10 years in sales, previously worked at a large corporation. Looking to close deals and drive revenue.",
-      appearance: "Mid-50s Caucasian professional, always well-dressed in business attire, frequently checks his smartwatch during meetings",
-      prompt: "You are a senior sales executive proposing a strategic partnership. Focus on long-term value creation, market positioning, and competitive advantage.",
-      firstMessage: "Our research shows that this partnership could create significant market opportunities for both organizations. What's your vision for your company's growth in the next 3-5 years?",
-      voiceId: "CwhRBWXzGAHq8TQ4Fs17"
-    }
-  }
-];
+      prompt: "You are an influential
