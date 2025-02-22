@@ -69,7 +69,7 @@ const ChatInterface = () => {
       
       // Start the conversation with your agent ID
       await conversation.startSession({
-        agentId: "agent_id_here", // Replace with your agent ID from ElevenLabs
+        agentId: "IFTHFHzCj8SPqmuq1gSq",
       });
       
     } catch (error) {
