@@ -1,19 +1,61 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import AnimatedGradient from "@/components/ui/animated-gradient";
 import Navigation from "@/components/layout/Navigation";
 import ChatInterface from "@/components/chat/ChatInterface";
 import ScenarioCard, { Scenario } from "@/components/scenarios/ScenarioCard";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { scenarios } from "@/data/scenarios";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/components/ui/use-toast";
 
 const Dashboard = () => {
   const [selectedScenario, setSelectedScenario] = useState<Scenario | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [session, setSession] = useState<any>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Fetch scenarios and personas from Supabase
+  const { data: scenarios = [], isLoading } = useQuery({
+    queryKey: ['scenarios'],
+    queryFn: async () => {
+      const { data: scenariosData, error: scenariosError } = await supabase
+        .from('scenarios')
+        .select(`
+          *,
+          persona:personas (
+            *
+          )
+        `);
+
+      if (scenariosError) {
+        console.error('Error fetching scenarios:', scenariosError);
+        toast({
+          title: "Error",
+          description: "Failed to load scenarios",
+          variant: "destructive",
+        });
+        return [];
+      }
+
+      // Transform the data to match the Scenario type
+      return scenariosData.map(scenario => ({
+        id: scenario.scenario_id,
+        title: scenario.title,
+        description: scenario.description,
+        category: scenario.category,
+        difficulty: scenario.difficulty as "Beginner" | "Intermediate" | "Advanced",
+        persona: {
+          prompt: scenario.persona.prompt,
+          firstMessage: scenario.persona.first_message,
+          voiceId: scenario.persona.voice_id
+        }
+      }));
+    }
+  });
+
   const categories = Array.from(new Set(scenarios.map(s => s.category)));
 
   useEffect(() => {
@@ -46,6 +88,20 @@ const Dashboard = () => {
 
   if (!session) {
     return null;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen">
+        <AnimatedGradient />
+        <Navigation />
+        <main className="container pt-32 pb-16">
+          <div className="max-w-6xl mx-auto text-center">
+            Loading scenarios...
+          </div>
+        </main>
+      </div>
+    );
   }
 
   return (

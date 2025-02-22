@@ -9,6 +9,51 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      personas: {
+        Row: {
+          appearance: string
+          background: string
+          company: string
+          created_at: string
+          first_message: string
+          id: string
+          name: string
+          personality: string
+          prompt: string
+          role: string
+          updated_at: string
+          voice_id: string
+        }
+        Insert: {
+          appearance: string
+          background: string
+          company: string
+          created_at?: string
+          first_message: string
+          id?: string
+          name: string
+          personality: string
+          prompt: string
+          role: string
+          updated_at?: string
+          voice_id: string
+        }
+        Update: {
+          appearance?: string
+          background?: string
+          company?: string
+          created_at?: string
+          first_message?: string
+          id?: string
+          name?: string
+          personality?: string
+          prompt?: string
+          role?: string
+          updated_at?: string
+          voice_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -32,6 +77,50 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
+      }
+      scenarios: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          difficulty: string
+          id: string
+          persona_id: string
+          scenario_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          difficulty: string
+          id?: string
+          persona_id: string
+          scenario_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          difficulty?: string
+          id?: string
+          persona_id?: string
+          scenario_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scenarios_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "personas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
