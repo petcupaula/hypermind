@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Play, Square } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const DIFFICULTY_OPTIONS = ["Beginner", "Intermediate", "Advanced"] as const;
@@ -32,6 +33,7 @@ const VOICE_OPTIONS = [
   { id: "yoZ06aMxZJJ28mfd3POQ", name: "Sam" },
 ] as const;
 
+type VoiceId = typeof VOICE_OPTIONS[number]["id"] | string;
 type Category = typeof DEFAULT_CATEGORIES[number] | string;
 
 const CreateScenarioForm = () => {
@@ -39,6 +41,9 @@ const CreateScenarioForm = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [customCategory, setCustomCategory] = useState("");
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  const [customVoiceId, setCustomVoiceId] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -50,7 +55,7 @@ const CreateScenarioForm = () => {
       company: "",
       prompt: "",
       firstMessage: "",
-      voiceId: VOICE_OPTIONS[0].id,
+      voiceId: VOICE_OPTIONS[0].id as VoiceId,
       appearance: "",
       background: "",
       personality: "",
@@ -152,6 +157,56 @@ const CreateScenarioForm = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const previewVoice = async () => {
+    if (isPlaying && audioElement) {
+      audioElement.pause();
+      setIsPlaying(false);
+      return;
+    }
+
+    try {
+      setIsPlaying(true);
+      const response = await fetch("https://api.elevenlabs.io/v1/text-to-speech/" + formData.persona.voiceId, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "xi-api-key": import.meta.env.VITE_ELEVEN_LABS_API_KEY || "",
+        },
+        body: JSON.stringify({
+          text: "Hello! This is how I sound.",
+          model_id: "eleven_monolingual_v1",
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.5,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate voice preview");
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      
+      audio.onended = () => {
+        setIsPlaying(false);
+      };
+
+      setAudioElement(audio);
+      audio.play();
+    } catch (error) {
+      console.error("Error previewing voice:", error);
+      toast({
+        title: "Error",
+        description: "Failed to preview voice. Please check your API key and voice ID.",
+        variant: "destructive",
+      });
+      setIsPlaying(false);
     }
   };
 
@@ -342,21 +397,53 @@ const CreateScenarioForm = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="personaVoice">Voice</Label>
-                <select
-                  id="personaVoice"
-                  className="w-full rounded-md border border-input bg-background px-3 py-2"
-                  value={formData.persona.voiceId}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    persona: { ...prev.persona, voiceId: e.target.value }
-                  }))}
-                >
-                  {VOICE_OPTIONS.map((voice) => (
-                    <option key={voice.id} value={voice.id}>
-                      {voice.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex flex-col gap-4">
+                  <select
+                    id="personaVoice"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2"
+                    value={formData.persona.voiceId}
+                    onChange={(e) => {
+                      const newVoiceId = e.target.value as VoiceId;
+                      setFormData(prev => ({
+                        ...prev,
+                        persona: { ...prev.persona, voiceId: newVoiceId }
+                      }));
+                      setCustomVoiceId("");
+                    }}
+                  >
+                    {VOICE_OPTIONS.map((voice) => (
+                      <option key={voice.id} value={voice.id}>
+                        {voice.name} ({voice.id})
+                      </option>
+                    ))}
+                  </select>
+
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Or enter custom voice ID"
+                      value={customVoiceId}
+                      onChange={(e) => {
+                        setCustomVoiceId(e.target.value);
+                        if (e.target.value) {
+                          setFormData(prev => ({
+                            ...prev,
+                            persona: { ...prev.persona, voiceId: e.target.value }
+                          }));
+                        }
+                      }}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={previewVoice}
+                      className="min-w-[100px]"
+                    >
+                      {isPlaying ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                      {isPlaying ? "Stop" : "Preview"}
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
