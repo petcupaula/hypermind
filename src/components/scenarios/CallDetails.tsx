@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
@@ -172,6 +173,18 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
     ));
   };
 
+  const renderDataCollectionResults = (results: unknown) => {
+    const typedResults = results as DataCollectionResult[];
+    if (!Array.isArray(typedResults)) return null;
+
+    return typedResults.map((result, index) => (
+      <div key={index} className="bg-muted/50 rounded-lg p-4">
+        <p className="font-medium mb-1">{result.field}</p>
+        <p className="text-sm">{result.value || 'Not collected'}</p>
+      </div>
+    ));
+  };
+
   if (isLoading) {
     return <div className="text-center py-8">Loading call details...</div>;
   }
@@ -256,12 +269,7 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
             <div>
               <h3 className="font-semibold text-lg mb-3">Data Collection Results</h3>
               <div className="grid gap-3">
-                {(call.data_collection_results as DataCollectionResult[]).map((result, index) => (
-                  <div key={index} className="bg-muted/50 rounded-lg p-4">
-                    <p className="font-medium mb-1">{result.field}</p>
-                    <p className="text-sm">{result.value || 'Not collected'}</p>
-                  </div>
-                ))}
+                {renderDataCollectionResults(call.data_collection_results)}
               </div>
             </div>
           )}
