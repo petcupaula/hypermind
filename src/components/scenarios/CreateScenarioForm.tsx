@@ -22,15 +22,51 @@ const DEFAULT_CATEGORIES = [
 ] as const;
 
 const VOICE_OPTIONS = [
-  { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel" },
-  { id: "AZnzlk1XvdvUeBnXmlld", name: "Domi" },
-  { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah" },
-  { id: "ErXwobaYiN019PkySvjV", name: "Antoni" },
-  { id: "MF3mGyEYCl7XYWbV9V6O", name: "Elli" },
-  { id: "TxGEqnHWrfWFTfGW9XjX", name: "Josh" },
-  { id: "VR6AewLTigWG4xSOukaG", name: "Arnold" },
-  { id: "pNInz6obpgDQGcFmaJgB", name: "Adam" },
-  { id: "yoZ06aMxZJJ28mfd3POQ", name: "Sam" },
+  { 
+    id: "21m00Tcm4TlvDq8ikWAM", 
+    name: "Rachel",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/21m00Tcm4TlvDq8ikWAM/6edb9076-c3e4-420c-b6ab-11d43fe341c8.mp3"
+  },
+  { 
+    id: "AZnzlk1XvdvUeBnXmlld", 
+    name: "Domi",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/AZnzlk1XvdvUeBnXmlld/c803f831-8b55-4b2b-aee3-72b3589e3b0c.mp3"
+  },
+  { 
+    id: "EXAVITQu4vr4xnSDxMaL", 
+    name: "Sarah",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/EXAVITQu4vr4xnSDxMaL/4f653e19-4d01-4f41-8d57-04309a850a66.mp3"
+  },
+  { 
+    id: "ErXwobaYiN019PkySvjV", 
+    name: "Antoni",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/ErXwobaYiN019PkySvjV/2c762d0b-59ae-42b1-ab35-354e6282c99c.mp3"
+  },
+  { 
+    id: "MF3mGyEYCl7XYWbV9V6O", 
+    name: "Elli",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/MF3mGyEYCl7XYWbV9V6O/f9fd64c3-5d62-45c1-9a86-8a30a8f64072.mp3"
+  },
+  { 
+    id: "TxGEqnHWrfWFTfGW9XjX", 
+    name: "Josh",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/TxGEqnHWrfWFTfGW9XjX/10b1c323-8e56-4d52-94fd-bdc42e42d572.mp3"
+  },
+  { 
+    id: "VR6AewLTigWG4xSOukaG", 
+    name: "Arnold",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/VR6AewLTigWG4xSOukaG/66e83dc2-6543-4897-9283-e028ac5ae4aa.mp3"
+  },
+  { 
+    id: "pNInz6obpgDQGcFmaJgB", 
+    name: "Adam",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/pNInz6obpgDQGcFmaJgB/e0b45450-78db-49b9-aaa4-d5358a6871bd.mp3"
+  },
+  { 
+    id: "yoZ06aMxZJJ28mfd3POQ", 
+    name: "Sam",
+    previewUrl: "https://storage.googleapis.com/eleven-public-prod/premade/voices/yoZ06aMxZJJ28mfd3POQ/af3f1b06-ec9e-4592-9e3c-0fbb41925529.mp3"
+  },
 ] as const;
 
 type VoiceId = typeof VOICE_OPTIONS[number]["id"] | string;
@@ -169,46 +205,18 @@ const CreateScenarioForm = () => {
 
     try {
       setIsPlaying(true);
-      
-      const { data: { secret: apiKey }, error: secretError } = await supabase
-        .rpc('get_secret', { secret_name: 'VITE_ELEVENLABS_API_KEY' });
-      
-      if (secretError || !apiKey) {
-        throw new Error("ElevenLabs API key not found. Please make sure you've added your API key in the project settings.");
+
+      const selectedVoice = VOICE_OPTIONS.find(voice => voice.id === formData.persona.voiceId);
+      const previewUrl = selectedVoice?.previewUrl;
+
+      if (!previewUrl) {
+        throw new Error("No preview available for this voice");
       }
 
-      if (!formData.persona.voiceId) {
-        throw new Error("No voice ID selected");
-      }
-
-      const response = await fetch("https://api.elevenlabs.io/v1/text-to-speech/" + formData.persona.voiceId, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "xi-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          text: "Hello! This is how I sound.",
-          model_id: "eleven_monolingual_v1",
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.5,
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.detail || `API error: ${response.status}`);
-      }
-
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
+      const audio = new Audio(previewUrl);
       
       audio.onended = () => {
         setIsPlaying(false);
-        URL.revokeObjectURL(audioUrl);
       };
 
       setAudioElement(audio);
@@ -217,7 +225,7 @@ const CreateScenarioForm = () => {
       console.error("Error previewing voice:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to preview voice. Please check your API key and voice ID.",
+        description: error.message || "Failed to preview voice",
         variant: "destructive",
       });
       setIsPlaying(false);
