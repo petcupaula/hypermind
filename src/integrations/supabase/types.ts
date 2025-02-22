@@ -11,39 +11,51 @@ export type Database = {
     Tables: {
       call_history: {
         Row: {
+          call_successful: boolean | null
           conversation_details: Json | null
           conversation_state: string | null
           created_at: string
+          data_collection_results: Json | null
           duration: number
           elevenlabs_conversation_id: string | null
+          evaluation_criteria_results: Json | null
           id: string
           recording_url: string | null
           scenario_id: string
           transcript: string | null
+          transcript_summary: string | null
           user_id: string | null
         }
         Insert: {
+          call_successful?: boolean | null
           conversation_details?: Json | null
           conversation_state?: string | null
           created_at?: string
+          data_collection_results?: Json | null
           duration: number
           elevenlabs_conversation_id?: string | null
+          evaluation_criteria_results?: Json | null
           id?: string
           recording_url?: string | null
           scenario_id: string
           transcript?: string | null
+          transcript_summary?: string | null
           user_id?: string | null
         }
         Update: {
+          call_successful?: boolean | null
           conversation_details?: Json | null
           conversation_state?: string | null
           created_at?: string
+          data_collection_results?: Json | null
           duration?: number
           elevenlabs_conversation_id?: string | null
+          evaluation_criteria_results?: Json | null
           id?: string
           recording_url?: string | null
           scenario_id?: string
           transcript?: string | null
+          transcript_summary?: string | null
           user_id?: string | null
         }
         Relationships: [

@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
@@ -21,18 +22,6 @@ interface EvalCriteriaResult {
 interface DataCollectionResult {
   field: string;
   value: string | null;
-}
-
-interface ConversationAnalysis {
-  transcript_summary?: string;
-  evaluation_criteria_results?: EvalCriteriaResult[];
-  data_collection_results?: DataCollectionResult[];
-}
-
-interface ConversationDetails {
-  id: string;
-  state: string;
-  analysis?: ConversationAnalysis;
 }
 
 type CallRecord = Database["public"]["Tables"]["call_history"]["Row"] & {
@@ -101,7 +90,7 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) throw new Error('No active session');
 
-      const response = await fetch(`https://api.elevenlabs.io/v1/conversation/${call.elevenlabs_conversation_id}`, {
+      const response = await fetch(`https://api.elevenlabs.io/v1/convai/conversations/${call.elevenlabs_conversation_id}`, {
         headers: {
           'xi-api-key': import.meta.env.VITE_ELEVENLABS_API_KEY,
         },
@@ -111,19 +100,23 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
         throw new Error('Failed to fetch ElevenLabs conversation details');
       }
 
-      const conversationDetails = await response.json();
+      const data = await response.json();
+      const analysis = data.analysis || {};
 
+      // Update the call record with the new analysis data
       const { error: updateError } = await supabase
         .from('call_history')
         .update({
-          conversation_details: conversationDetails,
-          conversation_state: conversationDetails.state
+          transcript_summary: analysis.transcript_summary || null,
+          evaluation_criteria_results: analysis.evaluation_criteria_results || null,
+          data_collection_results: analysis.data_collection_results || null,
+          call_successful: data.state === 'completed'
         })
         .eq('id', id);
 
       if (updateError) throw updateError;
 
-      return conversationDetails;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['call-details', id] });
@@ -186,8 +179,6 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
     return <div className="text-center py-8">Call not found</div>;
   }
 
-  const conversationDetails = call.conversation_details as ConversationDetails | null;
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -242,39 +233,35 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {conversationDetails?.analysis && (
-            <div className="space-y-6">
-              {conversationDetails.analysis.transcript_summary && (
-                <div>
-                  <h3 className="font-semibold text-lg mb-3">Conversation Summary</h3>
-                  <div className="bg-muted/50 rounded-lg p-4 text-sm">
-                    {conversationDetails.analysis.transcript_summary}
-                  </div>
-                </div>
-              )}
+          {call.transcript_summary && (
+            <div>
+              <h3 className="font-semibold text-lg mb-3">Conversation Summary</h3>
+              <div className="bg-muted/50 rounded-lg p-4 text-sm">
+                {call.transcript_summary}
+              </div>
+            </div>
+          )}
 
-              {conversationDetails.analysis.evaluation_criteria_results && (
-                <div>
-                  <h3 className="font-semibold text-lg mb-3">Evaluation Criteria</h3>
-                  <div className="space-y-3">
-                    {renderCriteriaResults(conversationDetails.analysis.evaluation_criteria_results)}
-                  </div>
-                </div>
-              )}
+          {call.evaluation_criteria_results && (
+            <div>
+              <h3 className="font-semibold text-lg mb-3">Evaluation Criteria</h3>
+              <div className="space-y-3">
+                {renderCriteriaResults(call.evaluation_criteria_results as EvalCriteriaResult[])}
+              </div>
+            </div>
+          )}
 
-              {conversationDetails.analysis.data_collection_results && (
-                <div>
-                  <h3 className="font-semibold text-lg mb-3">Data Collection Results</h3>
-                  <div className="grid gap-3">
-                    {conversationDetails.analysis.data_collection_results.map((result, index) => (
-                      <div key={index} className="bg-muted/50 rounded-lg p-4">
-                        <p className="font-medium mb-1">{result.field}</p>
-                        <p className="text-sm">{result.value || 'Not collected'}</p>
-                      </div>
-                    ))}
+          {call.data_collection_results && (
+            <div>
+              <h3 className="font-semibold text-lg mb-3">Data Collection Results</h3>
+              <div className="grid gap-3">
+                {(call.data_collection_results as DataCollectionResult[]).map((result, index) => (
+                  <div key={index} className="bg-muted/50 rounded-lg p-4">
+                    <p className="font-medium mb-1">{result.field}</p>
+                    <p className="text-sm">{result.value || 'Not collected'}</p>
                   </div>
-                </div>
-              )}
+                ))}
+              </div>
             </div>
           )}
 
