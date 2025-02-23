@@ -14,7 +14,7 @@ export const PersonaAvatar = ({ avatarUrl, name, size = "default", isActive }: P
   
   return (
     <div className={`relative ${isActive ? 'animate-pulse' : ''}`}>
-      <div className={`bg-primary/10 rounded-full ${sizeClasses} flex items-center justify-center overflow-hidden`}>
+      <div className={`bg-primary/10 rounded-full ${sizeClasses} flex items-center justify-center overflow-hidden border-4 border-white shadow-lg`}>
         {avatarUrl ? (
           <img
             src={transformImageUrl(avatarUrl)}
