@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
@@ -131,6 +132,17 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   return (
     <div className="w-full max-w-3xl mx-auto bg-white/95 backdrop-blur-lg rounded-3xl border border-gray-100 shadow-xl">
       <div className="p-8 space-y-8">
+        {/* Scenario Info */}
+        <div className="text-center space-y-3 max-w-xl mx-auto">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-semibold tracking-tight">
+              {scenario.title}
+            </h2>
+            <p className="text-gray-500">{scenario.description}</p>
+          </div>
+        </div>
+
+        {/* Avatars and Connection */}
         <div className="flex items-center justify-center gap-12">
           <div className="text-center space-y-2">
             <Avatar className="w-24 h-24 border-4 border-white shadow-lg mx-auto">
@@ -192,6 +204,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
           </div>
         </div>
 
+        {/* Alert section */}
         <div className="h-[52px]">
           {currentAlert && (
             <div className="animate-fade-up">
@@ -202,15 +215,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
           )}
         </div>
 
-        <div className="text-center space-y-3 max-w-xl mx-auto">
-          <div className="space-y-1">
-            <h2 className="text-2xl font-semibold tracking-tight">
-              {scenario.title}
-            </h2>
-            <p className="text-gray-500">{scenario.description}</p>
-          </div>
-        </div>
-
+        {/* Call Button */}
         <div className="flex justify-center">
           <Button
             size="lg"
