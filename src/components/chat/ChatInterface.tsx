@@ -131,7 +131,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
 
   return (
     <div className="w-full max-w-3xl mx-auto bg-white/95 backdrop-blur-lg rounded-3xl border border-gray-100 shadow-xl">
-      <div className="p-8 space-y-6"> {/* Reduced space-y-8 to space-y-6 */}
+      <div className="p-8 space-y-8">
         {/* Scenario Info */}
         <div className="text-center space-y-3 max-w-xl mx-auto">
           <div className="space-y-1">
@@ -205,18 +205,18 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
         </div>
 
         {/* Alert section */}
-        <div className="h-[28px]"> {/* Further reduced height */}
+        <div className="h-[32px]"> {/* Reduced height from 52px to 32px */}
           {currentAlert && (
             <div className="animate-fade-up">
-              <div className="bg-primary/10 text-primary rounded-lg py-1 px-4 text-center"> {/* Reduced padding-y */}
-                <p className="font-medium text-sm">{currentAlert}</p>
+              <div className="bg-primary/10 text-primary rounded-lg py-1.5 px-4 text-center"> {/* Reduced padding */}
+                <p className="font-medium text-sm">{currentAlert}</p> {/* Smaller text */}
               </div>
             </div>
           )}
         </div>
 
         {/* Call Button */}
-        <div className="flex justify-center pt-2"> {/* Added small top padding */}
+        <div className="flex justify-center">
           <Button
             size="lg"
             className={`px-8 py-6 text-base font-medium transition-all transform hover:scale-105 ${
