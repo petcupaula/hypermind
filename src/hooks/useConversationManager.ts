@@ -295,8 +295,12 @@ export const useConversationManager = (scenario: Scenario) => {
     console.log("Client initiated stop - Ending conversation...");
     if (conversationRef.current) {
       try {
+        // First end the session to ensure all final messages are received
+        await conversationRef.current.endSession();
+        // Wait a brief moment for any final messages to be processed
+        await new Promise(resolve => setTimeout(resolve, 500));
+        // Then handle the disconnection and save the data
         await handleDisconnection(false);
-        conversationRef.current.endSession();
         conversationRef.current = null;
       } catch (error) {
         console.error('Error during conversation stop:', error);
