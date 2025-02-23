@@ -205,11 +205,11 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
         </div>
 
         {/* Alert section */}
-        <div className="h-[52px]">
+        <div className="h-[32px]"> {/* Reduced height from 52px to 32px */}
           {currentAlert && (
             <div className="animate-fade-up">
-              <div className="bg-primary/10 text-primary rounded-lg p-4 text-center">
-                <p className="font-medium">{currentAlert}</p>
+              <div className="bg-primary/10 text-primary rounded-lg py-1.5 px-4 text-center"> {/* Reduced padding */}
+                <p className="font-medium text-sm">{currentAlert}</p> {/* Smaller text */}
               </div>
             </div>
           )}
