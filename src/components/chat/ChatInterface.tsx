@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
@@ -60,6 +59,14 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
     getUserProfile();
   }, []);
 
+  const getAvatarUrl = (avatarPath?: string) => {
+    if (!avatarPath) return undefined;
+    const { data } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(avatarPath);
+    return data.publicUrl;
+  };
+
   useEffect(() => {
     if (isConnected) {
       timerRef.current = setInterval(() => {
@@ -117,7 +124,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
           <div className="text-center space-y-2">
             <Avatar className="w-24 h-24 border-4 border-white shadow-lg mx-auto">
               <AvatarImage 
-                src={userProfile?.avatar_url} 
+                src={getAvatarUrl(userProfile?.avatar_url)}
                 alt="User avatar"
               />
               <AvatarFallback className="text-lg">
