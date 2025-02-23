@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
 import { Scenario } from "@/components/scenarios/ScenarioCard";
@@ -14,6 +14,8 @@ interface ChatInterfaceProps {
 }
 
 const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string | undefined>(undefined);
+
   const {
     isConnected,
     isSpeaking,
@@ -27,8 +29,13 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
     setDuration,
   } = useConversationManager(scenario);
 
-  const user = supabase.auth.getUser();
-  const userAvatarUrl = user?.data?.user?.user_metadata?.avatar_url;
+  useEffect(() => {
+    const getUserAvatar = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserAvatarUrl(user?.user_metadata?.avatar_url);
+    };
+    getUserAvatar();
+  }, []);
 
   useEffect(() => {
     if (isConnected) {
