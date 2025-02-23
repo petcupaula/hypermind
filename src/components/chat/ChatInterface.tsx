@@ -131,13 +131,15 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   return (
     <div className="w-full max-w-3xl mx-auto bg-white/95 backdrop-blur-lg rounded-3xl border border-gray-100 shadow-xl">
       <div className="p-8 space-y-8">
-        {currentAlert && (
-          <div className="animate-fade-up">
-            <div className="bg-primary/10 text-primary rounded-lg p-4 text-center">
-              <p className="font-medium">{currentAlert}</p>
+        <div className="h-[52px]">
+          {currentAlert && (
+            <div className="animate-fade-up absolute left-8 right-8">
+              <div className="bg-primary/10 text-primary rounded-lg p-4 text-center">
+                <p className="font-medium">{currentAlert}</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         <div className="flex items-center justify-center gap-12">
           <div className="text-center space-y-2">
