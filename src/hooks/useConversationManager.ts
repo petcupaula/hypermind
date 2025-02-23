@@ -89,74 +89,77 @@ export const useConversationManager = (scenario: Scenario) => {
 
     cleanupAudio();
 
-    try {
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !sessionData.session) {
-        console.error('No active session found');
-        return;
-      }
+    // Only attempt to save data if this isn't the demo scenario (scenario.id !== "demo")
+    if (scenario.id !== "demo") {
+      try {
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !sessionData.session) {
+          console.log('No active session found, skipping data save');
+        } else {
+          const fullTranscript = transcriptMessagesRef.current.join('\n');
+          console.log('Saving call with conversation ID:', currentCallRef.current?.id);
+          console.log('Full transcript:', fullTranscript);
 
-      const fullTranscript = transcriptMessagesRef.current.join('\n');
-      console.log('Saving call with conversation ID:', currentCallRef.current?.id);
-      console.log('Full transcript:', fullTranscript);
+          const callData = {
+            user_id: sessionData.session.user.id,
+            scenario_id: scenario.id,
+            duration: finalDuration,
+            transcript: fullTranscript || null,
+            elevenlabs_conversation_id: currentCallRef.current?.id || null,
+          };
 
-      const callData = {
-        user_id: sessionData.session.user.id,
-        scenario_id: scenario.id,
-        duration: finalDuration,
-        transcript: fullTranscript || null,
-        elevenlabs_conversation_id: currentCallRef.current?.id || null,
-      };
+          console.log('Saving call data:', callData);
 
-      console.log('Saving call data:', callData);
+          const { error: insertError } = await supabase
+            .from('call_history')
+            .insert([callData]);
 
-      const { error: insertError } = await supabase
-        .from('call_history')
-        .insert([callData]);
+          if (insertError) {
+            throw insertError;
+          }
 
-      if (insertError) {
-        throw insertError;
-      }
+          if (audioChunksRef.current.length > 0) {
+            const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+            const fileName = `call-${Date.now()}.webm`;
+            const filePath = `${sessionData.session.user.id}/${fileName}`;
+            const file = new File([audioBlob], fileName, { type: 'audio/webm' });
+            
+            const { error: uploadError } = await supabase.storage
+              .from('call-recordings')
+              .upload(filePath, file);
 
-      if (audioChunksRef.current.length > 0) {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const fileName = `call-${Date.now()}.webm`;
-        const filePath = `${sessionData.session.user.id}/${fileName}`;
-        const file = new File([audioBlob], fileName, { type: 'audio/webm' });
-        
-        const { error: uploadError } = await supabase.storage
-          .from('call-recordings')
-          .upload(filePath, file);
+            if (uploadError) {
+              throw uploadError;
+            }
 
-        if (uploadError) {
-          throw uploadError;
+            const { data: { publicUrl } } = supabase.storage
+              .from('call-recordings')
+              .getPublicUrl(filePath);
+
+            await supabase
+              .from('call_history')
+              .update({ recording_url: publicUrl })
+              .eq('scenario_id', scenario.id)
+              .eq('user_id', sessionData.session.user.id)
+              .order('created_at', { ascending: false })
+              .limit(1);
+          }
+
+          toast({
+            title: "Success",
+            description: "Call history saved successfully",
+          });
         }
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('call-recordings')
-          .getPublicUrl(filePath);
-
-        await supabase
-          .from('call_history')
-          .update({ recording_url: publicUrl })
-          .eq('scenario_id', scenario.id)
-          .eq('user_id', sessionData.session.user.id)
-          .order('created_at', { ascending: false })
-          .limit(1);
+      } catch (error) {
+        console.error('Error saving call history:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save call history",
+          variant: "destructive",
+        });
       }
-
-      toast({
-        title: "Success",
-        description: "Call history saved successfully",
-      });
-
-    } catch (error) {
-      console.error('Error saving call history:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save call history",
-        variant: "destructive",
-      });
+    } else {
+      console.log('Demo scenario - skipping data save');
     }
 
     audioChunksRef.current = [];
