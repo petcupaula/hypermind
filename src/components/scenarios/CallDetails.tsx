@@ -4,13 +4,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, RefreshCcw } from "lucide-react";
+import { ArrowLeft, RefreshCcw, CheckCircle2, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import dataCollectionConfig from "@/config/dataCollectionConfig";
 import { CallHeader } from "./call-details/CallHeader";
 import { AudioControls } from "./call-details/AudioControls";
 import { DataCollectionResults } from "./call-details/DataCollectionResults";
 import { ProspectQuestions } from "./call-details/ProspectQuestions";
 import type { CallRecord, EvaluationResult } from "./call-details/types";
+import type { Json } from "@/integrations/supabase/types";
 
 interface CallDetailsProps {
   id?: string;
@@ -273,7 +275,7 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
           <ArrowLeft className="h-4 w-4" />
           Back to Calls
         </Button>
-        {call?.elevenlabs_conversation_id && !fetchElevenLabsDetails.isPending && (
+        {call.elevenlabs_conversation_id && !fetchElevenLabsDetails.isPending && (
           <Button 
             variant="outline" 
             onClick={() => fetchElevenLabsDetails.mutate()}

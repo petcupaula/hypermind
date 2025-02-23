@@ -13,6 +13,15 @@ export interface CallRecord extends Database["public"]["Tables"]["call_history"]
       company: string;
     };
   };
+  created_at: string;
+  duration: number;
+  transcript: string | null;
+  transcript_summary: string | null;
+  evaluation_criteria_results: Json | null;
+  data_collection_results: Json | null;
+  elevenlabs_conversation_id: string | null;
+  recording_url: string | null;
+  elevenlabs_recording_url: string | null;
 }
 
 export interface EvalCriteriaResult {

@@ -1,5 +1,5 @@
 
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Calendar, Clock } from "lucide-react";
 import { format } from "date-fns";
 import type { CallRecord } from "./types";
