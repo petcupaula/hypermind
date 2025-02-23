@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
@@ -151,8 +150,7 @@ const ChatInterface = ({ scenario, defaultUserProfile }: ChatInterfaceProps) => 
 
         {/* Avatars and Connection */}
         <div className="flex items-center justify-center gap-12">
-          {/* User Profile */}
-          <div className="text-center space-y-2 w-[140px]">
+          <div className="text-center space-y-2">
             <Avatar className="w-24 h-24 border-4 border-white shadow-lg mx-auto">
               <AvatarImage 
                 src={getAvatarUrl(userProfile?.avatar_url)}
@@ -173,7 +171,6 @@ const ChatInterface = ({ scenario, defaultUserProfile }: ChatInterfaceProps) => 
             </div>
           </div>
 
-          {/* Connection Status */}
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-3">
               <div className={`h-[2px] w-16 transition-colors ${isConnected ? 'bg-primary' : 'bg-gray-200'}`} />
@@ -196,8 +193,7 @@ const ChatInterface = ({ scenario, defaultUserProfile }: ChatInterfaceProps) => 
             )}
           </div>
 
-          {/* AI Persona */}
-          <div className="text-center space-y-2 w-[140px]">
+          <div className="text-center space-y-2">
             <PersonaAvatar 
               avatarUrl={scenario.persona.avatarUrl} 
               name={scenario.persona.name}
@@ -215,11 +211,11 @@ const ChatInterface = ({ scenario, defaultUserProfile }: ChatInterfaceProps) => 
         </div>
 
         {/* Alert section */}
-        <div className="h-[32px]">
+        <div className="h-[32px]"> {/* Reduced height from 52px to 32px */}
           {currentAlert && (
             <div className="animate-fade-up">
-              <div className="bg-primary/10 text-primary rounded-lg py-1.5 px-4 text-center">
-                <p className="font-medium text-sm">{currentAlert}</p>
+              <div className="bg-primary/10 text-primary rounded-lg py-1.5 px-4 text-center"> {/* Reduced padding */}
+                <p className="font-medium text-sm">{currentAlert}</p> {/* Smaller text */}
               </div>
             </div>
           )}
