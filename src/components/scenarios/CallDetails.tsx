@@ -268,6 +268,8 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
     return <div className="text-center py-8">Call not found</div>;
   }
 
+  console.log('Data Collection Results:', call.data_collection_results);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -313,12 +315,14 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
             <div>
               <h3 className="font-semibold text-lg mb-3">Data Collection Results</h3>
               <div className="space-y-3">
-                <DataCollectionResults results={call.data_collection_results} />
+                <DataCollectionResults 
+                  results={call.data_collection_results} 
+                />
               </div>
             </div>
           )}
 
-          {call.data_collection_results && (
+          {call.data_collection_results?.prospect_questions && (
             <div>
               <h3 className="font-semibold text-lg mb-3">Prospect Questions</h3>
               <ProspectQuestions results={call.data_collection_results} />
