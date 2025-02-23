@@ -152,7 +152,7 @@ const ChatInterface = ({ scenario, defaultUserProfile }: ChatInterfaceProps) => 
         {/* Avatars and Connection */}
         <div className="flex items-center justify-center gap-12">
           {/* User Profile */}
-          <div className="text-center space-y-2 min-w-[160px]">
+          <div className="text-center space-y-2 w-[140px]">
             <Avatar className="w-24 h-24 border-4 border-white shadow-lg mx-auto">
               <AvatarImage 
                 src={getAvatarUrl(userProfile?.avatar_url)}
@@ -162,7 +162,7 @@ const ChatInterface = ({ scenario, defaultUserProfile }: ChatInterfaceProps) => 
                 {userProfile?.name?.[0] || 'Y'}
               </AvatarFallback>
             </Avatar>
-            <div className="space-y-0.5">
+            <div>
               <div className="text-lg font-semibold">{userProfile?.name || 'You'}</div>
               {userProfile?.role && (
                 <div className="text-sm text-gray-500">{userProfile.role}</div>
@@ -197,14 +197,14 @@ const ChatInterface = ({ scenario, defaultUserProfile }: ChatInterfaceProps) => 
           </div>
 
           {/* AI Persona */}
-          <div className="text-center space-y-2 min-w-[160px]">
+          <div className="text-center space-y-2 w-[140px]">
             <PersonaAvatar 
               avatarUrl={scenario.persona.avatarUrl} 
               name={scenario.persona.name}
               size="large"
               isActive={isConnected && isSpeaking}
             />
-            <div className="space-y-0.5">
+            <div>
               <div className="text-lg font-semibold">{scenario.persona.name}</div>
               <div className="text-sm text-gray-500">{scenario.persona.role}</div>
               {scenario.persona.company && (
