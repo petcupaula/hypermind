@@ -19,8 +19,6 @@ export const useConversationManager = (scenario: Scenario) => {
   const currentCallRef = useRef<{ id: string } | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const destinationRef = useRef<MediaStreamAudioDestinationNode | null>(null);
-  const finalDurationRef = useRef<number>(0);
-  const isEndingRef = useRef<boolean>(false);
 
   const setupAudioCapture = async (stream: MediaStream) => {
     try {
@@ -68,21 +66,8 @@ export const useConversationManager = (scenario: Scenario) => {
     destinationRef.current = null;
   };
 
-  const stopRecording = async () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      return new Promise<void>((resolve) => {
-        mediaRecorderRef.current!.onstop = () => {
-          console.log('MediaRecorder stopped');
-          resolve();
-        };
-        mediaRecorderRef.current!.stop();
-      });
-    }
-    return Promise.resolve();
-  };
-
   const saveCallHistory = async () => {
-    if (finalDurationRef.current === 0) {
+    if (!duration) {
       console.log('No duration recorded, skipping call history save');
       return;
     }
@@ -94,7 +79,7 @@ export const useConversationManager = (scenario: Scenario) => {
         return;
       }
 
-      console.log('Starting call history save with duration:', finalDurationRef.current);
+      console.log('Starting call history save with duration:', duration);
       console.log('Audio chunks:', audioChunksRef.current.length);
       console.log('Transcript messages:', transcriptMessagesRef.current.length);
 
@@ -103,14 +88,19 @@ export const useConversationManager = (scenario: Scenario) => {
       const { error: insertError } = await supabase.from('call_history').insert({
         user_id: sessionData.session.user.id,
         scenario_id: scenario.id,
-        duration: finalDurationRef.current,
+        duration,
         transcript: fullTranscript || null,
         elevenlabs_conversation_id: currentCallRef.current?.id || null,
       });
 
       if (insertError) {
         console.error('Error saving call history:', insertError);
-        throw insertError;
+        toast({
+          title: "Error",
+          description: "Failed to save call history",
+          variant: "destructive",
+        });
+        return;
       }
 
       if (audioChunksRef.current.length > 0) {
@@ -181,34 +171,23 @@ export const useConversationManager = (scenario: Scenario) => {
       console.log("Connected to ElevenLabs - Setting up session...");
       setIsConnected(true);
       transcriptMessagesRef.current = [];
-      isEndingRef.current = false;
       toast({
         title: "Connected",
         description: "Voice chat is now active",
       });
     },
-    onDisconnect: async () => {
-      if (isEndingRef.current) return;
-      
+    onDisconnect: () => {
       console.log("Disconnected from ElevenLabs - Cleaning up session...");
-      isEndingRef.current = true;
-      finalDurationRef.current = duration;
-      
-      await stopRecording();
-      
-      setLastCallDuration(duration);
-      setIsConnected(false);
-      
-      cleanupAudio();
-      
-      await saveCallHistory();
-      
-      audioChunksRef.current = [];
-      
-      toast({
-        title: "Disconnected",
-        description: "Voice chat connection ended",
-      });
+      if (isConnected) {
+        setIsConnected(false);
+        setLastCallDuration(duration);
+        cleanupAudio();
+        saveCallHistory();
+        toast({
+          title: "Disconnected",
+          description: "Voice chat connection ended",
+        });
+      }
     },
     onMessage: (message) => {
       console.log("Received message:", message);
@@ -229,12 +208,12 @@ export const useConversationManager = (scenario: Scenario) => {
     },
     onError: (error) => {
       console.error("ElevenLabs error:", error);
-      setIsConnected(false);
       toast({
         title: "Error",
         description: error?.message || "Failed to establish voice chat connection",
         variant: "destructive",
       });
+      setIsConnected(false);
     },
     overrides: {
       agent: {
@@ -254,10 +233,6 @@ export const useConversationManager = (scenario: Scenario) => {
     try {
       console.log("Starting conversation - Requesting microphone access...");
       setLastCallDuration(null);
-      setDuration(0);
-      finalDurationRef.current = 0;
-      isEndingRef.current = false;
-      audioChunksRef.current = [];
       
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
@@ -287,35 +262,34 @@ export const useConversationManager = (scenario: Scenario) => {
     } catch (error) {
       console.error("Error starting conversation:", error);
       cleanupAudio();
-      setIsConnected(false);
       toast({
         title: "Error",
         description: "Failed to start voice chat. Please ensure microphone access is allowed.",
         variant: "destructive",
       });
+      setIsConnected(false);
     }
   };
 
   const stopConversation = async () => {
     console.log("Manually stopping conversation...");
-    if (conversationRef.current && !isEndingRef.current) {
+    if (conversationRef.current) {
       try {
-        isEndingRef.current = true;
-        finalDurationRef.current = duration;
         setLastCallDuration(duration);
         
-        await stopRecording();
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+          mediaRecorderRef.current.stop();
+          console.log('Stopped recording audio');
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
         
         cleanupAudio();
-        
         await saveCallHistory();
         
         conversationRef.current.endSession();
         conversationRef.current = null;
         currentCallRef.current = null;
-        
         setIsConnected(false);
-        audioChunksRef.current = [];
       } catch (error) {
         console.error('Error during conversation stop:', error);
         toast({

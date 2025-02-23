@@ -13,22 +13,8 @@ export const PersonaAvatar = ({ avatarUrl, name, size = "default", isActive }: P
   const sizeClasses = size === "large" ? "w-[100px] h-[100px]" : "w-[74px] h-[74px]";
   
   return (
-    <div className="relative">
-      <div 
-        className={`
-          relative 
-          bg-primary/10 
-          rounded-full 
-          ${sizeClasses} 
-          flex 
-          items-center 
-          justify-center 
-          overflow-hidden
-          transition-all
-          duration-200
-          ${isActive ? 'ring-4 ring-primary ring-offset-2 scale-105' : ''}
-        `}
-      >
+    <div className={`relative ${isActive ? 'animate-pulse' : ''}`}>
+      <div className={`bg-primary/10 rounded-full ${sizeClasses} flex items-center justify-center overflow-hidden`}>
         {avatarUrl ? (
           <img
             src={transformImageUrl(avatarUrl)}
@@ -42,13 +28,10 @@ export const PersonaAvatar = ({ avatarUrl, name, size = "default", isActive }: P
         ) : (
           <Bot className="h-6 w-6 text-primary fallback-icon" />
         )}
-        {isActive && (
-          <div className="absolute inset-0 bg-primary/10 animate-pulse" />
-        )}
       </div>
       {isActive && (
-        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap">
-          <div className="bg-primary text-xs text-white px-3 py-1 rounded-full shadow-lg">
+        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2">
+          <div className="bg-primary text-xs text-white px-2 py-0.5 rounded-full">
             Speaking...
           </div>
         </div>
