@@ -39,13 +39,22 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   useEffect(() => {
     const getUserProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('User from auth:', user);
+      
       if (user) {
-        const { data: profile } = await supabase
+        const { data: profile, error } = await supabase
           .from('profiles')
           .select('avatar_url, role, company, name')
           .eq('id', user.id)
           .single();
-        setUserProfile(profile);
+          
+        console.log('Profile from database:', profile);
+        console.log('Profile error if any:', error);
+        
+        if (profile) {
+          console.log('Avatar URL:', profile.avatar_url);
+          setUserProfile(profile);
+        }
       }
     };
     getUserProfile();
@@ -107,7 +116,10 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
           {/* User */}
           <div className="text-center space-y-2">
             <Avatar className="w-24 h-24 border-4 border-white shadow-lg mx-auto">
-              <AvatarImage src={userProfile?.avatar_url} />
+              <AvatarImage 
+                src={userProfile?.avatar_url} 
+                alt="User avatar"
+              />
               <AvatarFallback className="text-lg">
                 {userProfile?.name?.[0] || 'Y'}
               </AvatarFallback>
