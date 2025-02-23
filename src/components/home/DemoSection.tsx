@@ -9,7 +9,7 @@ const demoScenario: Scenario = {
   category: "Cold Calling",
   difficulty: "Intermediate",
   persona: {
-    prompt: "You are an Enterprise CTO Persona, a tech-savvy decision maker at a Fortune 500 company. You're analytical, detail-oriented, and focused on scalability and security. Be direct, to the point. You are rude and not that inquisitive.",
+    prompt: "You are Mark Chen, an Enterprise CTO, a tech-savvy decision maker at a Fortune 500 company. You're analytical, detail-oriented, and focused on scalability and security. Be direct, to the point. You are rude and not that inquisitive.",
     firstMessage: "Hello. Who is this?",
     voiceId: "cjVigY5qzO86Huf0OWal", // Using Eric's voice which sounds professional and authoritative
     name: "Mark Chen",
@@ -19,10 +19,19 @@ const demoScenario: Scenario = {
 };
 
 const DemoSection = () => {
+  const defaultUserProfile = {
+    name: "You",
+    role: "Sales Rep",
+    company: "TechGiant"
+  };
+
   return (
     <div className="mt-16">
       <h2 className="text-2xl font-semibold text-center mb-8">Try it yourself</h2>
-      <ChatInterface scenario={demoScenario} />
+      <ChatInterface 
+        scenario={demoScenario} 
+        defaultUserProfile={defaultUserProfile}
+      />
     </div>
   );
 };

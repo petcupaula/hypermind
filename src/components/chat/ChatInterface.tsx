@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
@@ -11,6 +10,11 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface ChatInterfaceProps {
   scenario: Scenario;
+  defaultUserProfile?: {
+    name?: string;
+    role?: string;
+    company?: string;
+  };
 }
 
 interface UserProfile {
@@ -20,7 +24,7 @@ interface UserProfile {
   name?: string;
 }
 
-const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
+const ChatInterface = ({ scenario, defaultUserProfile }: ChatInterfaceProps) => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [currentAlert, setCurrentAlert] = useState<string | null>(null);
 
@@ -57,10 +61,12 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
           console.log('Avatar URL:', profile.avatar_url);
           setUserProfile(profile);
         }
+      } else if (defaultUserProfile) {
+        setUserProfile(defaultUserProfile);
       }
     };
     getUserProfile();
-  }, []);
+  }, [defaultUserProfile]);
 
   useEffect(() => {
     if (currentTranscript) {
