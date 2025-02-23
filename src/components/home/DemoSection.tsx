@@ -14,7 +14,8 @@ const demoScenario: Scenario = {
     voiceId: "cjVigY5qzO86Huf0OWal", // Using Eric's voice which sounds professional and authoritative
     name: "Mark Chen",
     role: "Chief Technology Officer",
-    company: "Fortune 500 Tech"
+    company: "Fortune 500 Tech",
+    avatarUrl: "/lovable-uploads/e81ab889-22dd-4dbe-8b83-d97980e5963a.png"
   }
 };
 
