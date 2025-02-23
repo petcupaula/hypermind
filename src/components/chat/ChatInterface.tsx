@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
@@ -150,7 +151,8 @@ const ChatInterface = ({ scenario, defaultUserProfile }: ChatInterfaceProps) => 
 
         {/* Avatars and Connection */}
         <div className="flex items-center justify-center gap-12">
-          <div className="text-center space-y-2">
+          {/* User Profile */}
+          <div className="text-center space-y-2 min-w-[160px]">
             <Avatar className="w-24 h-24 border-4 border-white shadow-lg mx-auto">
               <AvatarImage 
                 src={getAvatarUrl(userProfile?.avatar_url)}
@@ -160,7 +162,7 @@ const ChatInterface = ({ scenario, defaultUserProfile }: ChatInterfaceProps) => 
                 {userProfile?.name?.[0] || 'Y'}
               </AvatarFallback>
             </Avatar>
-            <div>
+            <div className="space-y-0.5">
               <div className="text-lg font-semibold">{userProfile?.name || 'You'}</div>
               {userProfile?.role && (
                 <div className="text-sm text-gray-500">{userProfile.role}</div>
@@ -171,6 +173,7 @@ const ChatInterface = ({ scenario, defaultUserProfile }: ChatInterfaceProps) => 
             </div>
           </div>
 
+          {/* Connection Status */}
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-3">
               <div className={`h-[2px] w-16 transition-colors ${isConnected ? 'bg-primary' : 'bg-gray-200'}`} />
@@ -193,14 +196,15 @@ const ChatInterface = ({ scenario, defaultUserProfile }: ChatInterfaceProps) => 
             )}
           </div>
 
-          <div className="text-center space-y-2">
+          {/* AI Persona */}
+          <div className="text-center space-y-2 min-w-[160px]">
             <PersonaAvatar 
               avatarUrl={scenario.persona.avatarUrl} 
               name={scenario.persona.name}
               size="large"
               isActive={isConnected && isSpeaking}
             />
-            <div>
+            <div className="space-y-0.5">
               <div className="text-lg font-semibold">{scenario.persona.name}</div>
               <div className="text-sm text-gray-500">{scenario.persona.role}</div>
               {scenario.persona.company && (
@@ -211,11 +215,11 @@ const ChatInterface = ({ scenario, defaultUserProfile }: ChatInterfaceProps) => 
         </div>
 
         {/* Alert section */}
-        <div className="h-[32px]"> {/* Reduced height from 52px to 32px */}
+        <div className="h-[32px]">
           {currentAlert && (
             <div className="animate-fade-up">
-              <div className="bg-primary/10 text-primary rounded-lg py-1.5 px-4 text-center"> {/* Reduced padding */}
-                <p className="font-medium text-sm">{currentAlert}</p> {/* Smaller text */}
+              <div className="bg-primary/10 text-primary rounded-lg py-1.5 px-4 text-center">
+                <p className="font-medium text-sm">{currentAlert}</p>
               </div>
             </div>
           )}
