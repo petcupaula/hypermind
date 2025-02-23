@@ -25,6 +25,7 @@ import {
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import dataCollectionConfig from "@/config/dataCollectionConfig";
 
 interface CallDetailsProps {
   id?: string;
@@ -79,31 +80,6 @@ type CallRecord = Database["public"]["Tables"]["call_history"]["Row"] & {
 
 const isGoodTalkListenRatio = (ratio: number) => {
   return ratio >= 0.8 && ratio <= 1.3;
-};
-
-const getDataCollectionResultStatus = (key: string, value: boolean | number | null): { isGood: boolean; description: string } => {
-  if (value === null) {
-    return { isGood: false, description: "Not collected" };
-  }
-
-  switch (key) {
-    case "talk_listen_ratio":
-      return {
-        isGood: isGoodTalkListenRatio(value as number),
-        description: isGoodTalkListenRatio(value as number) 
-          ? "Good balance between talking and listening" 
-          : "Imbalanced conversation ratio"
-      };
-    case "next_steps":
-    case "social_proof":
-    case "question_preconception":
-      return {
-        isGood: value as boolean,
-        description: value ? "Successfully achieved" : "Need improvement"
-      };
-    default:
-      return { isGood: true, description: "" };
-  }
 };
 
 const CallDetails = ({ id: propId }: CallDetailsProps) => {
@@ -405,6 +381,14 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
         </div>
       );
     });
+  };
+
+  const getDataCollectionResultStatus = (key: string, value: boolean | number | null) => {
+    const config = dataCollectionConfig[key];
+    if (!config) {
+      return { isGood: false, description: "Unknown metric" };
+    }
+    return config.evaluate(value);
   };
 
   if (isLoading) {
