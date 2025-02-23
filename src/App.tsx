@@ -12,6 +12,8 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import CallDetailsPage from "@/pages/CallDetails";
 import CallHistoryPage from "@/pages/CallHistory";
 import Profile from "@/pages/Profile";
+import Navigation from "@/components/layout/Navigation";
+import Footer from "@/components/layout/Footer";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,62 +24,80 @@ const queryClient = new QueryClient({
   },
 });
 
+function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <Navigation />
+      {children}
+      <Footer />
+    </>
+  );
+}
+
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Index />,
+    element: <Layout><Index /></Layout>,
   },
   {
     path: "/auth",
-    element: <Auth />,
+    element: <Layout><Auth /></Layout>,
   },
   {
     path: "/features",
-    element: <Features />,
+    element: <Layout><Features /></Layout>,
   },
   {
     path: "/pricing",
-    element: <Pricing />,
+    element: <Layout><Pricing /></Layout>,
   },
   {
     path: "/enterprise",
-    element: <Enterprise />,
+    element: <Layout><Enterprise /></Layout>,
   },
   {
     path: "/profile",
     element: (
-      <ProtectedRoute>
-        <Profile />
-      </ProtectedRoute>
+      <Layout>
+        <ProtectedRoute>
+          <Profile />
+        </ProtectedRoute>
+      </Layout>
     ),
   },
   {
     path: "/scenarios",
     element: (
-      <ProtectedRoute>
-        <Scenarios />
-      </ProtectedRoute>
+      <Layout>
+        <ProtectedRoute>
+          <Scenarios />
+        </ProtectedRoute>
+      </Layout>
     ),
   },
   {
     path: "/history",
     element: (
-      <ProtectedRoute>
-        <CallHistoryPage />
-      </ProtectedRoute>
+      <Layout>
+        <ProtectedRoute>
+          <CallHistoryPage />
+        </ProtectedRoute>
+      </Layout>
     ),
   },
   {
     path: "/calls/:id",
     element: (
-      <ProtectedRoute>
-        <CallDetailsPage />
-      </ProtectedRoute>
+      <Layout>
+        <ProtectedRoute>
+          <CallDetailsPage />
+        </ProtectedRoute>
+      </Layout>
     ),
   },
   {
     path: "*",
-    element: <NotFound />,
+    element: <Layout><NotFound /></Layout>,
   },
 ]);
 
