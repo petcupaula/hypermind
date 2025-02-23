@@ -106,6 +106,10 @@ const getDataCollectionResultStatus = (key: string, value: boolean | number | nu
   }
 };
 
+const isManipulativeCriterion = (key: string) => {
+  return key.toLowerCase().includes('manipulat');
+};
+
 const CallDetails = ({ id: propId }: CallDetailsProps) => {
   const { id: urlId } = useParams();
   const id = propId || urlId;
@@ -328,19 +332,24 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
     const typedResults = results as EvaluationCriteriaResults;
     if (!typedResults || typeof typedResults !== 'object') return null;
     
-    return Object.entries(typedResults).map(([key, result]) => (
-      <div key={key} className="flex items-start gap-2 p-3 bg-muted/30 rounded-md">
-        {result.result === "success" ? (
-          <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-        ) : (
-          <XCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
-        )}
-        <div>
-          <div className="font-medium capitalize">{key.replace(/_/g, ' ')}</div>
-          <div className="text-sm text-muted-foreground">{result.rationale}</div>
+    return Object.entries(typedResults).map(([key, result]) => {
+      const isManipulative = isManipulativeCriterion(key);
+      const success = isManipulative ? result.result === "failure" : result.result === "success";
+      
+      return (
+        <div key={key} className="flex items-start gap-2 p-3 bg-muted/30 rounded-md">
+          {success ? (
+            <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+          ) : (
+            <XCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+          )}
+          <div>
+            <div className="font-medium capitalize">{key.replace(/_/g, ' ')}</div>
+            <div className="text-sm text-muted-foreground">{result.rationale}</div>
+          </div>
         </div>
-      </div>
-    ));
+      );
+    });
   };
 
   const renderDataCollectionResults = (results: unknown) => {
