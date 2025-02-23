@@ -167,6 +167,44 @@ export const useConversationManager = (scenario: Scenario) => {
 
   const conversation = useConversation({
     api_key: import.meta.env.VITE_ELEVENLABS_API_KEY,
+    clientTools: {
+      displayCallHistory: async (parameters: { userId: string }) => {
+        try {
+          const { data: history, error } = await supabase
+            .from('call_history')
+            .select('*')
+            .eq('user_id', parameters.userId)
+            .order('created_at', { ascending: false })
+            .limit(5);
+
+          if (error) throw error;
+
+          return {
+            message: `Found ${history.length} recent calls`,
+            calls: history.map(call => ({
+              id: call.id,
+              duration: call.duration,
+              date: call.created_at,
+            }))
+          };
+        } catch (error) {
+          console.error('Error fetching call history:', error);
+          return {
+            message: "Failed to fetch call history",
+            error: true
+          };
+        }
+      },
+      endConversation: async () => {
+        try {
+          await handleDisconnection(true);
+          return "Call ended successfully";
+        } catch (error) {
+          console.error('Error ending conversation:', error);
+          return "Failed to end call";
+        }
+      }
+    },
     onConnect: () => {
       console.log("Connected to ElevenLabs - Setting up session...");
       setIsConnected(true);
