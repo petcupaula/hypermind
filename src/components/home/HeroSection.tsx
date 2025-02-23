@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +31,10 @@ const HeroSection = () => {
     }
   };
 
+  const handleWatchDemo = () => {
+    window.open("https://youtu.be/QUHrVlqKjyU", "_blank");
+  };
+
   return (
     <div className="max-w-4xl mx-auto text-center mb-16 animate-fade-up">
       <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
@@ -52,8 +56,14 @@ const HeroSection = () => {
           Start Training Now
           <ArrowRight className="h-4 w-4" />
         </Button>
-        <Button variant="outline" size="lg">
+        <Button 
+          variant="outline" 
+          size="lg" 
+          onClick={handleWatchDemo}
+          className="gap-2"
+        >
           Watch Demo
+          <ExternalLink className="h-4 w-4" />
         </Button>
       </div>
     </div>
