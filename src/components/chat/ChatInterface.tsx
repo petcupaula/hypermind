@@ -1,8 +1,8 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
 import { Scenario } from "@/components/scenarios/ScenarioCard";
-import { PersonaAvatar } from "./PersonaAvatar";
 import { useConversationManager } from "@/hooks/useConversationManager";
 import { formatDuration } from "@/utils/audio-utils";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -194,12 +194,15 @@ const ChatInterface = ({ scenario, defaultUserProfile }: ChatInterfaceProps) => 
           </div>
 
           <div className="text-center space-y-2">
-            <PersonaAvatar 
-              avatarUrl={scenario.persona.avatarUrl} 
-              name={scenario.persona.name}
-              size="large"
-              isActive={isConnected && isSpeaking}
-            />
+            <Avatar className={`w-24 h-24 border-4 border-white shadow-lg mx-auto ${isConnected && isSpeaking ? 'animate-pulse' : ''}`}>
+              <AvatarImage 
+                src={scenario.persona.avatarUrl}
+                alt={`${scenario.persona.name} avatar`}
+              />
+              <AvatarFallback className="text-lg bg-primary/10">
+                {scenario.persona.name?.[0] || 'A'}
+              </AvatarFallback>
+            </Avatar>
             <div>
               <div className="text-lg font-semibold">{scenario.persona.name}</div>
               <div className="text-sm text-gray-500">{scenario.persona.role}</div>
@@ -211,11 +214,11 @@ const ChatInterface = ({ scenario, defaultUserProfile }: ChatInterfaceProps) => 
         </div>
 
         {/* Alert section */}
-        <div className="h-[32px]"> {/* Reduced height from 52px to 32px */}
+        <div className="h-[32px]">
           {currentAlert && (
             <div className="animate-fade-up">
-              <div className="bg-primary/10 text-primary rounded-lg py-1.5 px-4 text-center"> {/* Reduced padding */}
-                <p className="font-medium text-sm">{currentAlert}</p> {/* Smaller text */}
+              <div className="bg-primary/10 text-primary rounded-lg py-1.5 px-4 text-center">
+                <p className="font-medium text-sm">{currentAlert}</p>
               </div>
             </div>
           )}
