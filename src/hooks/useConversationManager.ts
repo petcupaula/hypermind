@@ -67,7 +67,8 @@ export const useConversationManager = (scenario: Scenario) => {
   };
 
   const saveCallHistory = async () => {
-    if (!duration) {
+    const finalDuration = duration;
+    if (!finalDuration) {
       console.log('No duration recorded, skipping call history save');
       return;
     }
@@ -79,7 +80,7 @@ export const useConversationManager = (scenario: Scenario) => {
         return;
       }
 
-      console.log('Starting call history save with duration:', duration);
+      console.log('Starting call history save with duration:', finalDuration);
       console.log('Audio chunks:', audioChunksRef.current.length);
       console.log('Transcript messages:', transcriptMessagesRef.current.length);
 
@@ -88,7 +89,7 @@ export const useConversationManager = (scenario: Scenario) => {
       const { error: insertError } = await supabase.from('call_history').insert({
         user_id: sessionData.session.user.id,
         scenario_id: scenario.id,
-        duration,
+        duration: finalDuration,
         transcript: fullTranscript || null,
         elevenlabs_conversation_id: currentCallRef.current?.id || null,
       });
@@ -176,16 +177,18 @@ export const useConversationManager = (scenario: Scenario) => {
         description: "Voice chat is now active",
       });
     },
-    onDisconnect: () => {
+    onDisconnect: async () => {
       console.log("Disconnected from ElevenLabs - Cleaning up session...");
+      const finalDuration = duration;
       setIsConnected(false);
-      setLastCallDuration(duration);
+      setLastCallDuration(finalDuration);
       cleanupAudio();
-      saveCallHistory();
+      await saveCallHistory();
       toast({
         title: "Disconnected",
         description: "Voice chat connection ended",
       });
+      setDuration(0);
     },
     onMessage: (message) => {
       console.log("Received message:", message);
@@ -231,6 +234,7 @@ export const useConversationManager = (scenario: Scenario) => {
     try {
       console.log("Starting conversation - Requesting microphone access...");
       setLastCallDuration(null);
+      setDuration(0);
       
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
@@ -273,7 +277,8 @@ export const useConversationManager = (scenario: Scenario) => {
     console.log("Manually stopping conversation...");
     if (conversationRef.current) {
       try {
-        setLastCallDuration(duration);
+        const finalDuration = duration;
+        setLastCallDuration(finalDuration);
         
         if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
           mediaRecorderRef.current.stop();
@@ -288,6 +293,7 @@ export const useConversationManager = (scenario: Scenario) => {
         conversationRef.current = null;
         currentCallRef.current = null;
         setIsConnected(false);
+        setDuration(0);
       } catch (error) {
         console.error('Error during conversation stop:', error);
         toast({
