@@ -21,12 +21,14 @@ interface UserProfile {
 
 const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [currentAlert, setCurrentAlert] = useState<string | null>(null);
 
   const {
     isConnected,
     isSpeaking,
     duration,
     lastCallDuration,
+    currentTranscript,
     mediaRecorderRef,
     audioChunksRef,
     timerRef,
@@ -58,6 +60,17 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
     };
     getUserProfile();
   }, []);
+
+  useEffect(() => {
+    if (currentTranscript) {
+      const lines = currentTranscript.split('\n');
+      const lastLine = lines[lines.length - 1];
+      if (lastLine?.startsWith('System Alert:')) {
+        setCurrentAlert(lastLine.replace('System Alert:', '').trim());
+        setTimeout(() => setCurrentAlert(null), 5000);
+      }
+    }
+  }, [currentTranscript]);
 
   const getAvatarUrl = (avatarPath?: string) => {
     if (!avatarPath) return undefined;
@@ -118,9 +131,15 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   return (
     <div className="w-full max-w-3xl mx-auto bg-white/95 backdrop-blur-lg rounded-3xl border border-gray-100 shadow-xl">
       <div className="p-8 space-y-8">
-        {/* Avatars and Connection */}
+        {currentAlert && (
+          <div className="animate-fade-up">
+            <div className="bg-primary/10 text-primary rounded-lg p-4 text-center">
+              <p className="font-medium">{currentAlert}</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-center gap-12">
-          {/* User */}
           <div className="text-center space-y-2">
             <Avatar className="w-24 h-24 border-4 border-white shadow-lg mx-auto">
               <AvatarImage 
@@ -142,7 +161,6 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
             </div>
           </div>
 
-          {/* Connection Line */}
           <div className="flex flex-col items-center gap-2">
             <div className="flex items-center gap-3">
               <div className={`h-[2px] w-16 transition-colors ${isConnected ? 'bg-primary' : 'bg-gray-200'}`} />
@@ -165,7 +183,6 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
             )}
           </div>
 
-          {/* Persona */}
           <div className="text-center space-y-2">
             <PersonaAvatar 
               avatarUrl={scenario.persona.avatarUrl} 
@@ -183,7 +200,6 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
           </div>
         </div>
 
-        {/* Scenario Info */}
         <div className="text-center space-y-3 max-w-xl mx-auto">
           <div className="space-y-1">
             <h2 className="text-2xl font-semibold tracking-tight">
@@ -193,7 +209,6 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
           </div>
         </div>
 
-        {/* Call Button */}
         <div className="flex justify-center">
           <Button
             size="lg"
