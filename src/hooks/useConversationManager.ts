@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { useConversation } from "@11labs/react";
 import { useToast } from "@/components/ui/use-toast";
@@ -96,14 +97,22 @@ export const useConversationManager = (scenario: Scenario) => {
       }
 
       const fullTranscript = transcriptMessagesRef.current.join('\n');
+      console.log('Saving call with conversation ID:', currentCallRef.current?.id);
+      console.log('Full transcript:', fullTranscript);
 
-      const { error: insertError } = await supabase.from('call_history').insert({
+      const callData = {
         user_id: sessionData.session.user.id,
         scenario_id: scenario.id,
         duration: finalDuration,
         transcript: fullTranscript || null,
         elevenlabs_conversation_id: currentCallRef.current?.id || null,
-      });
+      };
+
+      console.log('Saving call data:', callData);
+
+      const { error: insertError } = await supabase
+        .from('call_history')
+        .insert([callData]);
 
       if (insertError) {
         throw insertError;
@@ -202,8 +211,9 @@ export const useConversationManager = (scenario: Scenario) => {
       if ('source' in message) {
         const messageText = message.message;
         if (typeof messageText === 'string') {
-          transcriptMessagesRef.current.push(`${message.source}: ${messageText}`);
-          setCurrentTranscript(prev => prev + "\n" + `${message.source}: ${messageText}`);
+          const formattedMessage = `${message.source}: ${messageText}`;
+          transcriptMessagesRef.current.push(formattedMessage);
+          setCurrentTranscript(prev => prev + "\n" + formattedMessage);
         }
       } else if (message.type === 'agent_response_started') {
         console.log("Agent started speaking");
@@ -267,6 +277,7 @@ export const useConversationManager = (scenario: Scenario) => {
       console.log("Conversation started with ID:", conversationId);
       currentCallRef.current = { id: conversationId };
       conversationRef.current = conversation;
+      transcriptMessagesRef.current = []; // Reset transcript at start
       
     } catch (error) {
       console.error("Error starting conversation:", error);
