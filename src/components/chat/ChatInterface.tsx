@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
@@ -22,6 +21,7 @@ interface UserProfile {
 
 const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [hasError, setHasError] = useState(false);
 
   const {
     isConnected,
@@ -68,8 +68,25 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
     return data.publicUrl;
   };
 
+  const handleDisconnect = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+      console.log('Stopped recording audio due to disconnection');
+    }
+    setDuration(0);
+    audioChunksRef.current = [];
+    setHasError(true);
+    // Auto-reset error state after 5 seconds
+    setTimeout(() => setHasError(false), 5000);
+  };
+
   useEffect(() => {
     if (isConnected) {
+      setHasError(false);
       timerRef.current = setInterval(() => {
         setDuration(prev => prev + 1);
       }, 1000);
@@ -91,28 +108,14 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
         })
         .catch(error => {
           console.error('Error accessing microphone:', error);
+          handleDisconnect();
         });
     } else {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-        mediaRecorderRef.current.stop();
-        console.log('Stopped recording audio');
-      }
-      setDuration(0);
-      audioChunksRef.current = [];
+      handleDisconnect();
     }
 
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-        mediaRecorderRef.current.stop();
-        console.log('Cleanup: stopped recording audio');
-      }
+      handleDisconnect();
     };
   }, [isConnected]);
 
@@ -150,13 +153,19 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
               <div className={`p-2.5 rounded-full transition-all transform ${
                 isConnected 
                   ? 'bg-primary text-white scale-110 shadow-lg' 
-                  : 'bg-gray-100 text-gray-400'
+                  : hasError
+                    ? 'bg-red-500 text-white'
+                    : 'bg-gray-100 text-gray-400'
               }`}>
                 <Phone className="h-5 w-5" />
               </div>
               <div className={`h-[2px] w-16 transition-colors ${isConnected ? 'bg-primary' : 'bg-gray-200'}`} />
             </div>
-            {(isConnected || lastCallDuration) && (
+            {hasError ? (
+              <div className="text-sm font-medium text-red-500 animate-fade-in">
+                Call disconnected
+              </div>
+            ) : (isConnected || lastCallDuration) && (
               <div className="text-sm font-medium text-gray-500">
                 {isConnected 
                   ? formatDuration(duration)
