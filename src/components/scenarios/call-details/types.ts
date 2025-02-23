@@ -1,0 +1,54 @@
+
+import type { Database } from "@/integrations/supabase/types";
+
+export interface CallRecord extends Database["public"]["Tables"]["call_history"]["Row"] {
+  scenarios: {
+    title: string;
+    description: string;
+    category: string;
+    difficulty: string;
+    persona: {
+      name: string;
+      role: string;
+      company: string;
+    };
+  };
+}
+
+export interface EvalCriteriaResult {
+  criterion: string;
+  passed: boolean;
+  explanation: string;
+}
+
+export interface DataCollectionSchema {
+  type: string;
+  description: string;
+  dynamic_variable: string;
+}
+
+export interface DataCollectionItem {
+  value: boolean | number | null;
+  rationale: string;
+  json_schema: DataCollectionSchema | null;
+  data_collection_id: string;
+}
+
+export type DataCollectionMetrics = {
+  [key: string]: DataCollectionItem;
+}
+
+export interface DataCollectionResults {
+  metrics: DataCollectionMetrics;
+  prospect_questions?: string[];
+}
+
+export interface EvaluationResult {
+  result: "success" | "failure";
+  rationale: string;
+  criteria_id: string;
+}
+
+export type EvaluationCriteriaResults = {
+  [key: string]: EvaluationResult;
+}

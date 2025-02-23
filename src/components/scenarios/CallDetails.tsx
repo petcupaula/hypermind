@@ -2,85 +2,19 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Play,
-  ArrowLeft,
-  RefreshCcw,
-  Calendar,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  Pause,
-  HelpCircle,
-  Info
-} from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { format } from "date-fns";
+import { ArrowLeft, RefreshCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
-import dataCollectionConfig from "@/config/dataCollectionConfig";
+import { CallHeader } from "./call-details/CallHeader";
+import { AudioControls } from "./call-details/AudioControls";
+import { DataCollectionResults } from "./call-details/DataCollectionResults";
+import { ProspectQuestions } from "./call-details/ProspectQuestions";
+import type { CallRecord, EvaluationResult } from "./call-details/types";
 
 interface CallDetailsProps {
   id?: string;
 }
-
-interface EvalCriteriaResult {
-  criterion: string;
-  passed: boolean;
-  explanation: string;
-}
-
-interface DataCollectionSchema {
-  type: string;
-  description: string;
-  dynamic_variable: string;
-}
-
-interface DataCollectionItem {
-  value: boolean | number | null;
-  rationale: string;
-  json_schema: DataCollectionSchema | null;
-  data_collection_id: string;
-}
-
-type DataCollectionResults = {
-  [key: string]: DataCollectionItem;
-}
-
-interface EvaluationResult {
-  result: "success" | "failure";
-  rationale: string;
-  criteria_id: string;
-}
-
-type EvaluationCriteriaResults = {
-  [key: string]: EvaluationResult;
-}
-
-type CallRecord = Database["public"]["Tables"]["call_history"]["Row"] & {
-  scenarios: {
-    title: string;
-    description: string;
-    category: string;
-    difficulty: string;
-    persona: {
-      name: string;
-      role: string;
-      company: string;
-    };
-  };
-};
-
-const isGoodTalkListenRatio = (ratio: number) => {
-  return ratio >= 0.8 && ratio <= 1.3;
-};
 
 const CallDetails = ({ id: propId }: CallDetailsProps) => {
   const { id: urlId } = useParams();
@@ -123,7 +57,7 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
         throw error;
       }
 
-      return data;
+      return data as CallRecord;
     }
   });
 
@@ -254,7 +188,6 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
     try {
       if (activeAudio) {
         if (activeAudio.src === recordingUrl) {
-          // Toggle play/pause for the same audio
           if (isPlaying) {
             activeAudio.pause();
             setIsPlaying(false);
@@ -264,7 +197,6 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
           }
           return;
         } else {
-          // Stop previous audio if playing a different one
           activeAudio.pause();
           activeAudio.currentTime = 0;
           setActiveAudio(null);
@@ -272,7 +204,6 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
         }
       }
 
-      // Create and play new audio
       const audio = new Audio(recordingUrl);
       audio.addEventListener('ended', () => {
         setIsPlaying(false);
@@ -301,7 +232,7 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
   }, [activeAudio]);
 
   const renderCriteriaResults = (results: unknown) => {
-    const typedResults = results as EvaluationCriteriaResults;
+    const typedResults = results as { [key: string]: EvaluationResult };
     if (!typedResults || typeof typedResults !== 'object') return null;
     
     return Object.entries(typedResults).map(([key, result]) => (
@@ -317,70 +248,6 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
         </div>
       </div>
     ));
-  };
-
-  const renderDataCollectionResults = (results: unknown) => {
-    const typedResults = results as DataCollectionResults;
-    if (!typedResults || typeof typedResults !== 'object') return null;
-
-    return Object.entries(typedResults).map(([key, result]) => {
-      const status = getDataCollectionResultStatus(key, result.value);
-      
-      return (
-        <div key={key} className="bg-muted/50 rounded-lg p-4">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 mt-1">
-              {result.value === null ? (
-                <HelpCircle className="h-5 w-5 text-gray-400" />
-              ) : (
-                status.isGood ? (
-                  <CheckCircle2 className="h-5 w-5 text-green-500" />
-                ) : (
-                  <XCircle className="h-5 w-5 text-red-500" />
-                )
-              )}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="font-medium capitalize">{key.replace(/_/g, ' ')}</div>
-                  {result.json_schema?.description && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-[300px]">
-                          {result.json_schema.description}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </div>
-                <div className={`text-sm px-2 py-0.5 rounded-full ${
-                  result.value === null 
-                    ? "bg-gray-100 text-gray-700"
-                    : status.isGood
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                }`}>
-                  {result.value === null ? 'Not collected' : 
-                   typeof result.value === 'boolean' ? (result.value ? 'Yes' : 'No') : 
-                   typeof result.value === 'number' ? result.value.toFixed(2) : 
-                   result.value}
-                </div>
-              </div>
-              <div className="text-sm text-muted-foreground mt-2">
-                {status.description}
-              </div>
-              <div className="text-sm text-muted-foreground mt-2 pt-2 border-t border-border/50">
-                {result.rationale}
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    });
   };
 
   const getDataCollectionResultStatus = (key: string, value: boolean | number | null) => {
@@ -420,40 +287,7 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
       </div>
 
       <Card className="bg-card/50 backdrop-blur">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="text-2xl">{call.scenarios.title}</CardTitle>
-              <CardDescription>
-                <div className="mt-2 space-y-2">
-                  <div className="text-base">{call.scenarios.description}</div>
-                  <div className="flex items-center gap-2">
-                    <div className="text-sm font-medium text-primary">
-                      {call.scenarios.persona.name} • {call.scenarios.persona.role} at {call.scenarios.persona.company}
-                    </div>
-                    <span className={`inline-block text-xs px-2 py-1 rounded-full ${
-                      call.scenarios.difficulty === "Beginner" ? "bg-green-100 text-green-700" :
-                      call.scenarios.difficulty === "Intermediate" ? "bg-yellow-100 text-yellow-700" :
-                      "bg-red-100 text-red-700"
-                    }`}>
-                      {call.scenarios.difficulty}
-                    </span>
-                  </div>
-                </div>
-              </CardDescription>
-            </div>
-            <div className="text-sm text-muted-foreground space-y-1">
-              <div className="flex items-center gap-1.5">
-                <Calendar className="h-4 w-4" />
-                {format(new Date(call.created_at), 'MMM d, yyyy')}
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Clock className="h-4 w-4" />
-                {formatDuration(call.duration)}
-              </div>
-            </div>
-          </div>
-        </CardHeader>
+        <CallHeader call={call} formatDuration={formatDuration} />
         <CardContent className="space-y-6">
           {call.transcript_summary && (
             <div>
@@ -476,9 +310,14 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
           {call.data_collection_results && (
             <div>
               <h3 className="font-semibold text-lg mb-3">Data Collection Results</h3>
-              <div className="grid gap-3">
-                {renderDataCollectionResults(call.data_collection_results)}
-              </div>
+              <DataCollectionResults results={call.data_collection_results} />
+            </div>
+          )}
+
+          {call.data_collection_results && (
+            <div>
+              <h3 className="font-semibold text-lg mb-3">Prospect Questions</h3>
+              <ProspectQuestions results={call.data_collection_results} />
             </div>
           )}
 
@@ -491,39 +330,12 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
             </div>
           )}
 
-          {(call.recording_url || call.elevenlabs_recording_url) && (
-            <div>
-              <h3 className="font-semibold text-lg mb-3">Recordings</h3>
-              <div className="space-y-3">
-                {call.recording_url && (
-                  <Button
-                    variant="secondary"
-                    onClick={() => handleAudio(call.recording_url!)}
-                    className="gap-2 min-w-[200px] justify-start"
-                  >
-                    {isPlaying && activeAudio?.src === call.recording_url ? (
-                      <><Pause className="h-4 w-4" /> Pause Local Recording</>
-                    ) : (
-                      <><Play className="h-4 w-4" /> Play Local Recording</>
-                    )}
-                  </Button>
-                )}
-                {call.elevenlabs_recording_url && (
-                  <Button
-                    variant="secondary"
-                    onClick={() => handleAudio(call.elevenlabs_recording_url!)}
-                    className="gap-2 min-w-[200px] justify-start"
-                  >
-                    {isPlaying && activeAudio?.src === call.elevenlabs_recording_url ? (
-                      <><Pause className="h-4 w-4" /> Pause ElevenLabs Recording</>
-                    ) : (
-                      <><Play className="h-4 w-4" /> Play ElevenLabs Recording</>
-                    )}
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
+          <AudioControls 
+            call={call}
+            isPlaying={isPlaying}
+            activeAudio={activeAudio}
+            handleAudio={handleAudio}
+          />
         </CardContent>
       </Card>
     </div>
