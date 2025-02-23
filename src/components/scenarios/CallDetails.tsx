@@ -14,7 +14,8 @@ import {
   XCircle,
   Pause,
   HelpCircle,
-  Info
+  Info,
+  MessageCircle
 } from "lucide-react";
 import {
   Tooltip,
@@ -478,6 +479,26 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
               <h3 className="font-semibold text-lg mb-3">Data Collection Results</h3>
               <div className="grid gap-3">
                 {renderDataCollectionResults(call.data_collection_results)}
+              </div>
+            </div>
+          )}
+
+          {call.data_collection_results?.prospect_questions && (
+            <div>
+              <h3 className="font-semibold text-lg mb-3">Prospect Questions</h3>
+              <div className="space-y-3">
+                {Array.isArray(call.data_collection_results.prospect_questions) ? (
+                  call.data_collection_results.prospect_questions.map((question, index) => (
+                    <div key={index} className="flex items-start gap-3 bg-muted/50 rounded-lg p-4">
+                      <MessageCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="text-sm">{question}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    No prospect questions were detected in this conversation.
+                  </div>
+                )}
               </div>
             </div>
           )}
