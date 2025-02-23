@@ -178,16 +178,14 @@ export const useConversationManager = (scenario: Scenario) => {
     },
     onDisconnect: () => {
       console.log("Disconnected from ElevenLabs - Cleaning up session...");
-      if (isConnected) {
-        setIsConnected(false);
-        setLastCallDuration(duration);
-        cleanupAudio();
-        saveCallHistory();
-        toast({
-          title: "Disconnected",
-          description: "Voice chat connection ended",
-        });
-      }
+      setIsConnected(false);
+      setLastCallDuration(duration);
+      cleanupAudio();
+      saveCallHistory();
+      toast({
+        title: "Disconnected",
+        description: "Voice chat connection ended",
+      });
     },
     onMessage: (message) => {
       console.log("Received message:", message);
@@ -208,12 +206,12 @@ export const useConversationManager = (scenario: Scenario) => {
     },
     onError: (error) => {
       console.error("ElevenLabs error:", error);
+      setIsConnected(false);
       toast({
         title: "Error",
         description: error?.message || "Failed to establish voice chat connection",
         variant: "destructive",
       });
-      setIsConnected(false);
     },
     overrides: {
       agent: {
@@ -262,12 +260,12 @@ export const useConversationManager = (scenario: Scenario) => {
     } catch (error) {
       console.error("Error starting conversation:", error);
       cleanupAudio();
+      setIsConnected(false);
       toast({
         title: "Error",
         description: "Failed to start voice chat. Please ensure microphone access is allowed.",
         variant: "destructive",
       });
-      setIsConnected(false);
     }
   };
 
