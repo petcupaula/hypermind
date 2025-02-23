@@ -51,11 +51,11 @@ interface DataCollectionItem {
   data_collection_id: string;
 }
 
-interface DataCollectionMetrics {
+type DataCollectionMetrics = {
   [key: string]: DataCollectionItem;
 }
 
-interface DataCollectionResults extends DataCollectionMetrics {
+interface DataCollectionResults {
   metrics: DataCollectionMetrics;
   prospect_questions?: string[];
 }
@@ -327,10 +327,9 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
 
   const renderDataCollectionResults = (results: unknown) => {
     const typedResults = results as DataCollectionResults;
-    if (!typedResults || typeof typedResults !== 'object') return null;
+    if (!typedResults?.metrics || typeof typedResults.metrics !== 'object') return null;
 
-    return Object.entries(typedResults.metrics || typedResults).map(([key, result]) => {
-      if (key === 'prospect_questions') return null;
+    return Object.entries(typedResults.metrics).map(([key, result]) => {
       const status = getDataCollectionResultStatus(key, result.value);
       
       return (
@@ -387,7 +386,7 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
           </div>
         </div>
       );
-    }).filter(Boolean);
+    });
   };
 
   const getDataCollectionResultStatus = (key: string, value: boolean | number | null) => {
