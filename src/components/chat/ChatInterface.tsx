@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
@@ -21,6 +22,7 @@ interface UserProfile {
 
 const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  // Initialize hasError as false and only set it to true on actual disconnection events
   const [hasError, setHasError] = useState(false);
 
   const {
@@ -110,14 +112,17 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
           console.error('Error accessing microphone:', error);
           handleDisconnect();
         });
-    } else {
+    } else if (hasError) { // Only handle disconnect if there's an actual error
       handleDisconnect();
     }
 
     return () => {
-      handleDisconnect();
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     };
-  }, [isConnected]);
+  }, [isConnected, hasError]);
 
   return (
     <div className="w-full max-w-3xl mx-auto bg-white/95 backdrop-blur-lg rounded-3xl border border-gray-100 shadow-xl">
@@ -169,7 +174,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
               <div className="text-sm font-medium text-gray-500">
                 {isConnected 
                   ? formatDuration(duration)
-                  : `Last call: ${formatDuration(lastCallDuration)}`
+                  : lastCallDuration && `Last call: ${formatDuration(lastCallDuration)}`
                 }
               </div>
             )}
