@@ -10,7 +10,7 @@ const demoScenario: Scenario = {
   difficulty: "Intermediate",
   persona: {
     prompt: "You are an Enterprise CTO Persona, a tech-savvy decision maker at a Fortune 500 company. You're analytical, detail-oriented, and focused on scalability and security. Be direct, to the point. You are rude and not that inquisitive.",
-    firstMessage: "Hello, this is Mark Chen speaking. I'm in between meetings, how can I help you?",
+    firstMessage: "Hello. Who is this?",
     voiceId: "cjVigY5qzO86Huf0OWal", // Using Eric's voice which sounds professional and authoritative
     name: "Mark Chen",
     role: "Chief Technology Officer",
