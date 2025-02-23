@@ -13,8 +13,15 @@ interface ChatInterfaceProps {
   scenario: Scenario;
 }
 
+interface UserProfile {
+  avatar_url?: string;
+  role?: string;
+  company?: string;
+  name?: string;
+}
+
 const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
-  const [userAvatarUrl, setUserAvatarUrl] = useState<string | undefined>(undefined);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   const {
     isConnected,
@@ -30,11 +37,18 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   } = useConversationManager(scenario);
 
   useEffect(() => {
-    const getUserAvatar = async () => {
+    const getUserProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      setUserAvatarUrl(user?.user_metadata?.avatar_url);
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('avatar_url, role, company, name')
+          .eq('id', user.id)
+          .single();
+        setUserProfile(profile);
+      }
     };
-    getUserAvatar();
+    getUserProfile();
   }, []);
 
   useEffect(() => {
@@ -91,32 +105,49 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
         {/* Avatars and Connection */}
         <div className="flex items-center justify-center gap-12">
           {/* User */}
-          <div className="text-center space-y-3">
+          <div className="text-center space-y-2">
             <Avatar className="w-24 h-24 border-4 border-white shadow-lg mx-auto">
-              <AvatarImage src={userAvatarUrl} />
-              <AvatarFallback className="text-lg">You</AvatarFallback>
+              <AvatarImage src={userProfile?.avatar_url} />
+              <AvatarFallback className="text-lg">
+                {userProfile?.name?.[0] || 'Y'}
+              </AvatarFallback>
             </Avatar>
             <div>
-              <div className="text-lg font-semibold">You</div>
-              <div className="text-sm text-gray-500">User</div>
+              <div className="text-lg font-semibold">{userProfile?.name || 'You'}</div>
+              {userProfile?.role && (
+                <div className="text-sm text-gray-500">{userProfile.role}</div>
+              )}
+              {userProfile?.company && (
+                <div className="text-sm text-gray-400">{userProfile.company}</div>
+              )}
             </div>
           </div>
 
           {/* Connection Line */}
-          <div className="flex items-center gap-3 -mt-4">
-            <div className={`h-[2px] w-16 transition-colors ${isConnected ? 'bg-primary' : 'bg-gray-200'}`} />
-            <div className={`p-2.5 rounded-full transition-all transform ${
-              isConnected 
-                ? 'bg-primary text-white scale-110 shadow-lg' 
-                : 'bg-gray-100 text-gray-400'
-            }`}>
-              <Phone className="h-5 w-5" />
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex items-center gap-3">
+              <div className={`h-[2px] w-16 transition-colors ${isConnected ? 'bg-primary' : 'bg-gray-200'}`} />
+              <div className={`p-2.5 rounded-full transition-all transform ${
+                isConnected 
+                  ? 'bg-primary text-white scale-110 shadow-lg' 
+                  : 'bg-gray-100 text-gray-400'
+              }`}>
+                <Phone className="h-5 w-5" />
+              </div>
+              <div className={`h-[2px] w-16 transition-colors ${isConnected ? 'bg-primary' : 'bg-gray-200'}`} />
             </div>
-            <div className={`h-[2px] w-16 transition-colors ${isConnected ? 'bg-primary' : 'bg-gray-200'}`} />
+            {(isConnected || lastCallDuration) && (
+              <div className="text-sm font-medium text-gray-500">
+                {isConnected 
+                  ? formatDuration(duration)
+                  : `Last call: ${formatDuration(lastCallDuration)}`
+                }
+              </div>
+            )}
           </div>
 
           {/* Persona */}
-          <div className="text-center space-y-3">
+          <div className="text-center space-y-2">
             <PersonaAvatar 
               avatarUrl={scenario.persona.avatarUrl} 
               name={scenario.persona.name}
@@ -126,6 +157,9 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
             <div>
               <div className="text-lg font-semibold">{scenario.persona.name}</div>
               <div className="text-sm text-gray-500">{scenario.persona.role}</div>
+              {scenario.persona.company && (
+                <div className="text-sm text-gray-400">{scenario.persona.company}</div>
+              )}
             </div>
           </div>
         </div>
@@ -135,22 +169,9 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
           <div className="space-y-1">
             <h2 className="text-2xl font-semibold tracking-tight">
               {scenario.title}
-              {(isConnected || lastCallDuration) && (
-                <span className="ml-2 text-base font-normal text-gray-500">
-                  {isConnected 
-                    ? formatDuration(duration)
-                    : `Last call: ${formatDuration(lastCallDuration)}`
-                  }
-                </span>
-              )}
             </h2>
             <p className="text-gray-500">{scenario.description}</p>
           </div>
-          {scenario.persona.company && (
-            <div className="text-sm text-gray-400">
-              at {scenario.persona.company}
-            </div>
-          )}
         </div>
 
         {/* Call Button */}
