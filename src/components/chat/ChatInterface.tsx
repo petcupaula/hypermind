@@ -1,7 +1,7 @@
 
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Mic } from "lucide-react";
+import { Phone } from "lucide-react";
 import { Scenario } from "@/components/scenarios/ScenarioCard";
 import { PersonaAvatar } from "./PersonaAvatar";
 import { useConversationManager } from "@/hooks/useConversationManager";
@@ -75,14 +75,16 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
 
   return (
     <div className="w-full max-w-3xl mx-auto bg-white/50 backdrop-blur-lg rounded-2xl border border-gray-200 shadow-lg">
-      <div className="border-b p-4">
-        <div className="flex items-center gap-4">
-          <PersonaAvatar 
-            avatarUrl={scenario.persona.avatarUrl} 
-            name={scenario.persona.name} 
-          />
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-1">
+      <div className="border-b p-6">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-full flex justify-center">
+            <PersonaAvatar 
+              avatarUrl={scenario.persona.avatarUrl} 
+              name={scenario.persona.name} 
+            />
+          </div>
+          <div className="text-center w-full">
+            <div className="flex items-center justify-center gap-2 mb-1">
               <h3 className="font-medium">{scenario.title}</h3>
               {isConnected ? (
                 <span className="text-sm font-medium text-primary">
@@ -94,9 +96,9 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
                 </span>
               ) : null}
             </div>
-            <p className="text-sm text-gray-500 mb-2">{scenario.description}</p>
+            <p className="text-sm text-gray-500 mb-4">{scenario.description}</p>
             {scenario.persona.name && (
-              <div className="flex items-center gap-2 mt-2">
+              <div className="flex items-center justify-center gap-2">
                 <div className="text-sm">
                   <span className="font-medium">{scenario.persona.name}</span>
                   {scenario.persona.role && scenario.persona.company && (
@@ -117,7 +119,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
           className={`gap-2 ${isConnected ? 'bg-red-500 hover:bg-red-600' : 'bg-primary hover:bg-primary/90'}`}
           onClick={isConnected ? stopConversation : startConversation}
         >
-          <Mic className={`h-5 w-5 ${isConnected && 'animate-pulse'}`} />
+          <Phone className={`h-5 w-5 ${isConnected && 'animate-pulse'}`} />
           {isConnected ? 'End Call' : 'Start Call'}
         </Button>
       </div>
