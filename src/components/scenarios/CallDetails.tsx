@@ -14,8 +14,7 @@ import {
   XCircle,
   Pause,
   HelpCircle,
-  Info,
-  MessageCircle
+  Info
 } from "lucide-react";
 import {
   Tooltip,
@@ -51,13 +50,8 @@ interface DataCollectionItem {
   data_collection_id: string;
 }
 
-type DataCollectionMetrics = {
+type DataCollectionResults = {
   [key: string]: DataCollectionItem;
-}
-
-interface DataCollectionResults {
-  metrics: DataCollectionMetrics;
-  prospect_questions?: string[];
 }
 
 interface EvaluationResult {
@@ -327,9 +321,9 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
 
   const renderDataCollectionResults = (results: unknown) => {
     const typedResults = results as DataCollectionResults;
-    if (!typedResults?.metrics || typeof typedResults.metrics !== 'object') return null;
+    if (!typedResults || typeof typedResults !== 'object') return null;
 
-    return Object.entries(typedResults.metrics).map(([key, result]) => {
+    return Object.entries(typedResults).map(([key, result]) => {
       const status = getDataCollectionResultStatus(key, result.value);
       
       return (
@@ -484,33 +478,6 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
               <h3 className="font-semibold text-lg mb-3">Data Collection Results</h3>
               <div className="grid gap-3">
                 {renderDataCollectionResults(call.data_collection_results)}
-              </div>
-            </div>
-          )}
-
-          {call.data_collection_results?.prospect_questions && (
-            <div>
-              <h3 className="font-semibold text-lg mb-3">Prospect Questions</h3>
-              <div className="space-y-3">
-                {(() => {
-                  const results = call.data_collection_results as unknown as DataCollectionResults;
-                  const questions = results?.prospect_questions;
-                  
-                  if (Array.isArray(questions) && questions.length > 0) {
-                    return questions.map((question, index) => (
-                      <div key={index} className="flex items-start gap-3 bg-muted/50 rounded-lg p-4">
-                        <MessageCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                        <div className="text-sm">{question}</div>
-                      </div>
-                    ));
-                  }
-                  
-                  return (
-                    <div className="text-sm text-muted-foreground">
-                      No prospect questions were detected in this conversation.
-                    </div>
-                  );
-                })()}
               </div>
             </div>
           )}
