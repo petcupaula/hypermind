@@ -1,3 +1,4 @@
+
 import { useState, useRef } from 'react';
 import { useConversation } from "@11labs/react";
 import { useToast } from "@/components/ui/use-toast";
@@ -66,12 +67,31 @@ export const useConversationManager = (scenario: Scenario) => {
     destinationRef.current = null;
   };
 
-  const saveCallHistory = async () => {
-    if (!duration) {
-      console.log('No duration recorded, skipping call history save');
-      return;
+  const handleDisconnection = async (isServerInitiated: boolean = false) => {
+    console.log(`Handling ${isServerInitiated ? 'server-initiated' : 'client-initiated'} disconnection`);
+    
+    // Stop the timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
 
+    // Save the final duration
+    const finalDuration = duration;
+    setLastCallDuration(finalDuration);
+
+    // Stop media recording
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+      console.log('Stopped recording audio');
+      // Wait for the last chunks to be processed
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    // Clean up audio context
+    cleanupAudio();
+
+    // Save call history
     try {
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !sessionData.session) {
@@ -79,88 +99,76 @@ export const useConversationManager = (scenario: Scenario) => {
         return;
       }
 
-      console.log('Starting call history save with duration:', duration);
-      console.log('Audio chunks:', audioChunksRef.current.length);
-      console.log('Transcript messages:', transcriptMessagesRef.current.length);
-
       const fullTranscript = transcriptMessagesRef.current.join('\n');
 
       const { error: insertError } = await supabase.from('call_history').insert({
         user_id: sessionData.session.user.id,
         scenario_id: scenario.id,
-        duration,
+        duration: finalDuration,
         transcript: fullTranscript || null,
         elevenlabs_conversation_id: currentCallRef.current?.id || null,
       });
 
       if (insertError) {
-        console.error('Error saving call history:', insertError);
-        toast({
-          title: "Error",
-          description: "Failed to save call history",
-          variant: "destructive",
-        });
-        return;
+        throw insertError;
       }
 
+      // Handle audio recording
       if (audioChunksRef.current.length > 0) {
-        try {
-          console.log('Processing audio recording...');
-          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-          const fileName = `call-${Date.now()}.webm`;
-          const filePath = `${sessionData.session.user.id}/${fileName}`;
-          const file = new File([audioBlob], fileName, { type: 'audio/webm' });
-          
-          console.log('Uploading recording to storage...');
-          const { error: uploadError } = await supabase.storage
-            .from('call-recordings')
-            .upload(filePath, file);
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const fileName = `call-${Date.now()}.webm`;
+        const filePath = `${sessionData.session.user.id}/${fileName}`;
+        const file = new File([audioBlob], fileName, { type: 'audio/webm' });
+        
+        const { error: uploadError } = await supabase.storage
+          .from('call-recordings')
+          .upload(filePath, file);
 
-          if (uploadError) {
-            console.error('Error uploading recording:', uploadError);
-            throw uploadError;
-          }
-
-          console.log('Recording uploaded successfully');
-          const { data: { publicUrl } } = supabase.storage
-            .from('call-recordings')
-            .getPublicUrl(filePath);
-
-          const { error: updateError } = await supabase
-            .from('call_history')
-            .update({ recording_url: publicUrl })
-            .eq('scenario_id', scenario.id)
-            .eq('user_id', sessionData.session.user.id)
-            .order('created_at', { ascending: false })
-            .limit(1);
-
-          if (updateError) {
-            console.error('Error updating recording URL:', updateError);
-            throw updateError;
-          }
-        } catch (error) {
-          console.error('Error handling recording:', error);
-          toast({
-            title: "Warning",
-            description: "Call saved but failed to save recording",
-            variant: "destructive",
-          });
-          return;
+        if (uploadError) {
+          throw uploadError;
         }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('call-recordings')
+          .getPublicUrl(filePath);
+
+        await supabase
+          .from('call_history')
+          .update({ recording_url: publicUrl })
+          .eq('scenario_id', scenario.id)
+          .eq('user_id', sessionData.session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(1);
       }
 
-      console.log('Call history saved successfully');
       toast({
         title: "Success",
         description: "Call history saved successfully",
       });
 
     } catch (error) {
-      console.error('Error in saveCallHistory:', error);
+      console.error('Error saving call history:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred while saving the call",
+        description: "Failed to save call history",
         variant: "destructive",
+      });
+    }
+
+    // Clear recording data
+    audioChunksRef.current = [];
+    transcriptMessagesRef.current = [];
+    
+    // Update connection state
+    setIsConnected(false);
+    currentCallRef.current = null;
+
+    // Show appropriate toast message
+    if (isServerInitiated) {
+      toast({
+        title: "Call Ended",
+        description: "The call was disconnected by the server",
+        variant: "default",
       });
     }
   };
@@ -177,17 +185,8 @@ export const useConversationManager = (scenario: Scenario) => {
       });
     },
     onDisconnect: () => {
-      console.log("Disconnected from ElevenLabs - Cleaning up session...");
-      if (isConnected) {
-        setIsConnected(false);
-        setLastCallDuration(duration);
-        cleanupAudio();
-        saveCallHistory();
-        toast({
-          title: "Disconnected",
-          description: "Voice chat connection ended",
-        });
-      }
+      console.log("Server initiated disconnect - Cleaning up session...");
+      handleDisconnection(true);
     },
     onMessage: (message) => {
       console.log("Received message:", message);
@@ -213,7 +212,7 @@ export const useConversationManager = (scenario: Scenario) => {
         description: error?.message || "Failed to establish voice chat connection",
         variant: "destructive",
       });
-      setIsConnected(false);
+      handleDisconnection(true);
     },
     overrides: {
       agent: {
@@ -233,6 +232,7 @@ export const useConversationManager = (scenario: Scenario) => {
     try {
       console.log("Starting conversation - Requesting microphone access...");
       setLastCallDuration(null);
+      setDuration(0);
       
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
@@ -272,24 +272,12 @@ export const useConversationManager = (scenario: Scenario) => {
   };
 
   const stopConversation = async () => {
-    console.log("Manually stopping conversation...");
+    console.log("Client initiated stop - Ending conversation...");
     if (conversationRef.current) {
       try {
-        setLastCallDuration(duration);
-        
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-          mediaRecorderRef.current.stop();
-          console.log('Stopped recording audio');
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-        
-        cleanupAudio();
-        await saveCallHistory();
-        
+        await handleDisconnection(false);
         conversationRef.current.endSession();
         conversationRef.current = null;
-        currentCallRef.current = null;
-        setIsConnected(false);
       } catch (error) {
         console.error('Error during conversation stop:', error);
         toast({
@@ -300,6 +288,20 @@ export const useConversationManager = (scenario: Scenario) => {
       }
     }
   };
+
+  useEffect(() => {
+    if (isConnected) {
+      timerRef.current = setInterval(() => {
+        setDuration(prev => prev + 1);
+      }, 1000);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [isConnected]);
 
   return {
     isConnected,
