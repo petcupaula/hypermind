@@ -6,6 +6,8 @@ import { Scenario } from "@/components/scenarios/ScenarioCard";
 import { PersonaAvatar } from "./PersonaAvatar";
 import { useConversationManager } from "@/hooks/useConversationManager";
 import { formatDuration } from "@/utils/audio-utils";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ChatInterfaceProps {
   scenario: Scenario;
@@ -76,13 +78,40 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   return (
     <div className="w-full max-w-3xl mx-auto bg-white/50 backdrop-blur-lg rounded-2xl border border-gray-200 shadow-lg">
       <div className="border-b p-6">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-full flex justify-center">
-            <PersonaAvatar 
-              avatarUrl={scenario.persona.avatarUrl} 
-              name={scenario.persona.name} 
-            />
+        <div className="flex flex-col items-center gap-6">
+          <div className="w-full flex items-center justify-center gap-6 relative">
+            {/* Current User Avatar */}
+            <div className="text-center">
+              <Avatar className="w-[100px] h-[100px] border-4 border-background mb-2">
+                <AvatarImage src={supabase.auth.getUser()?.data?.user?.user_metadata?.avatar_url} />
+                <AvatarFallback>You</AvatarFallback>
+              </Avatar>
+              <div className="text-sm font-medium">You</div>
+            </div>
+
+            {/* Connection Line */}
+            <div className="flex items-center gap-2">
+              <div className={`h-[2px] w-12 transition-colors ${isConnected ? 'bg-primary' : 'bg-gray-200'}`} />
+              <div className={`p-2 rounded-full transition-colors ${isConnected ? 'bg-primary text-white' : 'bg-gray-200'}`}>
+                <Phone className="h-4 w-4" />
+              </div>
+              <div className={`h-[2px] w-12 transition-colors ${isConnected ? 'bg-primary' : 'bg-gray-200'}`} />
+            </div>
+
+            {/* Persona Avatar */}
+            <div className="text-center">
+              <div className="mb-2">
+                <PersonaAvatar 
+                  avatarUrl={scenario.persona.avatarUrl} 
+                  name={scenario.persona.name}
+                  size="large"
+                  isActive={isConnected && isSpeaking}
+                />
+              </div>
+              <div className="text-sm font-medium">{scenario.persona.name}</div>
+            </div>
           </div>
+
           <div className="text-center w-full">
             <div className="flex items-center justify-center gap-2 mb-1">
               <h3 className="font-medium">{scenario.title}</h3>
@@ -97,16 +126,9 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
               ) : null}
             </div>
             <p className="text-sm text-gray-500 mb-4">{scenario.description}</p>
-            {scenario.persona.name && (
-              <div className="flex items-center justify-center gap-2">
-                <div className="text-sm">
-                  <span className="font-medium">{scenario.persona.name}</span>
-                  {scenario.persona.role && scenario.persona.company && (
-                    <span className="text-gray-600">
-                      {" "}• {scenario.persona.role} at {scenario.persona.company}
-                    </span>
-                  )}
-                </div>
+            {scenario.persona.role && scenario.persona.company && (
+              <div className="text-sm text-gray-600">
+                {scenario.persona.role} at {scenario.persona.company}
               </div>
             )}
           </div>
