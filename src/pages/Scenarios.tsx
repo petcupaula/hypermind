@@ -6,7 +6,6 @@ import Navigation from "@/components/layout/Navigation";
 import ChatInterface from "@/components/chat/ChatInterface";
 import ScenarioCard, { Scenario } from "@/components/scenarios/ScenarioCard";
 import CreateScenarioForm from "@/components/scenarios/CreateScenarioForm";
-import GenerateAvatars from "@/components/scenarios/GenerateAvatars";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -165,8 +164,7 @@ const Dashboard = () => {
               <p className="text-xl text-gray-600 mb-8">
                 Choose a scenario to practice your sales skills with different customer personas
               </p>
-              <div className="flex justify-center gap-4 mb-8">
-                <GenerateAvatars />
+              <div className="flex justify-center mb-8">
                 <Button 
                   onClick={() => setIsCreating(true)}
                   className="gap-2"
