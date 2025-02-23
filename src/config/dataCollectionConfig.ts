@@ -72,6 +72,18 @@ const dataCollectionConfig: Record<string, DataCollectionConfig> = {
           ? "Failed to obtain permission"
           : "Not collected"
     })
+  },
+  manipulative: {
+    type: "boolean",
+    description: "Whether manipulative behavior was detected",
+    evaluate: (value) => ({
+      isGood: value === false,
+      description: value === true
+        ? "Manipulative behavior detected"
+        : value === false
+          ? "No manipulative behavior detected"
+          : "Not collected"
+    })
   }
 };
 
