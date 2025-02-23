@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { useConversation } from "@11labs/react";
 import { useToast } from "@/components/ui/use-toast";
@@ -20,6 +19,7 @@ export const useConversationManager = (scenario: Scenario) => {
   const currentCallRef = useRef<{ id: string } | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const destinationRef = useRef<MediaStreamAudioDestinationNode | null>(null);
+  const durationRef = useRef<number>(0);
 
   const setupAudioCapture = async (stream: MediaStream) => {
     try {
@@ -70,28 +70,24 @@ export const useConversationManager = (scenario: Scenario) => {
   const handleDisconnection = async (isServerInitiated: boolean = false) => {
     console.log(`Handling ${isServerInitiated ? 'server-initiated' : 'client-initiated'} disconnection`);
     
-    // Stop the timer
+    const finalDuration = durationRef.current;
+    console.log('Final duration:', finalDuration);
+    
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
 
-    // Save the final duration
-    const finalDuration = duration;
     setLastCallDuration(finalDuration);
 
-    // Stop media recording
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop();
       console.log('Stopped recording audio');
-      // Wait for the last chunks to be processed
       await new Promise(resolve => setTimeout(resolve, 500));
     }
 
-    // Clean up audio context
     cleanupAudio();
 
-    // Save call history
     try {
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !sessionData.session) {
@@ -113,7 +109,6 @@ export const useConversationManager = (scenario: Scenario) => {
         throw insertError;
       }
 
-      // Handle audio recording
       if (audioChunksRef.current.length > 0) {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         const fileName = `call-${Date.now()}.webm`;
@@ -155,15 +150,12 @@ export const useConversationManager = (scenario: Scenario) => {
       });
     }
 
-    // Clear recording data
     audioChunksRef.current = [];
     transcriptMessagesRef.current = [];
     
-    // Update connection state
     setIsConnected(false);
     currentCallRef.current = null;
 
-    // Show appropriate toast message
     if (isServerInitiated) {
       toast({
         title: "Call Ended",
@@ -179,6 +171,8 @@ export const useConversationManager = (scenario: Scenario) => {
       console.log("Connected to ElevenLabs - Setting up session...");
       setIsConnected(true);
       transcriptMessagesRef.current = [];
+      durationRef.current = 0;
+      setDuration(0);
       toast({
         title: "Connected",
         description: "Voice chat is now active",
@@ -233,6 +227,7 @@ export const useConversationManager = (scenario: Scenario) => {
       console.log("Starting conversation - Requesting microphone access...");
       setLastCallDuration(null);
       setDuration(0);
+      durationRef.current = 0;
       
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
@@ -292,7 +287,11 @@ export const useConversationManager = (scenario: Scenario) => {
   useEffect(() => {
     if (isConnected) {
       timerRef.current = setInterval(() => {
-        setDuration(prev => prev + 1);
+        setDuration(prev => {
+          const newDuration = prev + 1;
+          durationRef.current = newDuration;
+          return newDuration;
+        });
       }, 1000);
     }
 
