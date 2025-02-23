@@ -22,7 +22,6 @@ interface UserProfile {
 
 const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [isUserSpeaking, setIsUserSpeaking] = useState(false);
 
   const {
     isConnected,
@@ -84,9 +83,6 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
             if (event.data.size > 0) {
               console.log('Audio data available:', event.data.size, 'bytes');
               audioChunksRef.current.push(event.data);
-              setIsUserSpeaking(true);
-              // Reset speaking state after a short delay
-              setTimeout(() => setIsUserSpeaking(false), 300);
             }
           };
 
@@ -106,7 +102,6 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
         console.log('Stopped recording audio');
       }
       setDuration(0);
-      setIsUserSpeaking(false);
       audioChunksRef.current = [];
     }
 
@@ -127,10 +122,8 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
         {/* Avatars and Connection */}
         <div className="flex items-center justify-center gap-12">
           {/* User */}
-          <div className={`text-center space-y-2 ${isUserSpeaking ? 'animate-pulse' : ''}`}>
-            <Avatar className={`w-24 h-24 border-4 ${
-              isUserSpeaking ? 'border-primary shadow-lg shadow-primary/25' : 'border-white shadow-lg'
-            } mx-auto transition-all duration-200`}>
+          <div className="text-center space-y-2 relative">
+            <Avatar className="w-24 h-24 border-4 border-white shadow-lg mx-auto">
               <AvatarImage 
                 src={getAvatarUrl(userProfile?.avatar_url)}
                 alt="User avatar"
@@ -148,13 +141,6 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
                 <div className="text-sm text-gray-400">{userProfile.company}</div>
               )}
             </div>
-            {isUserSpeaking && isConnected && (
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2">
-                <div className="bg-primary text-xs text-white px-2 py-0.5 rounded-full">
-                  Speaking...
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Connection Line */}
@@ -181,7 +167,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
           </div>
 
           {/* Persona */}
-          <div className="text-center space-y-2">
+          <div className="text-center space-y-2 relative">
             <PersonaAvatar 
               avatarUrl={scenario.persona.avatarUrl} 
               name={scenario.persona.name}
