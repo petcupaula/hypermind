@@ -20,6 +20,7 @@ export const useConversationManager = (scenario: Scenario) => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const destinationRef = useRef<MediaStreamAudioDestinationNode | null>(null);
   const finalDurationRef = useRef<number>(0);
+  const isEndingRef = useRef<boolean>(false);
 
   const setupAudioCapture = async (stream: MediaStream) => {
     try {
@@ -67,6 +68,19 @@ export const useConversationManager = (scenario: Scenario) => {
     destinationRef.current = null;
   };
 
+  const stopRecording = async () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      return new Promise<void>((resolve) => {
+        mediaRecorderRef.current!.onstop = () => {
+          console.log('MediaRecorder stopped');
+          resolve();
+        };
+        mediaRecorderRef.current!.stop();
+      });
+    }
+    return Promise.resolve();
+  };
+
   const saveCallHistory = async () => {
     if (finalDurationRef.current === 0) {
       console.log('No duration recorded, skipping call history save');
@@ -96,12 +110,7 @@ export const useConversationManager = (scenario: Scenario) => {
 
       if (insertError) {
         console.error('Error saving call history:', insertError);
-        toast({
-          title: "Error",
-          description: "Failed to save call history",
-          variant: "destructive",
-        });
-        return;
+        throw insertError;
       }
 
       if (audioChunksRef.current.length > 0) {
@@ -172,18 +181,30 @@ export const useConversationManager = (scenario: Scenario) => {
       console.log("Connected to ElevenLabs - Setting up session...");
       setIsConnected(true);
       transcriptMessagesRef.current = [];
+      isEndingRef.current = false;
       toast({
         title: "Connected",
         description: "Voice chat is now active",
       });
     },
     onDisconnect: async () => {
+      if (isEndingRef.current) return;
+      
       console.log("Disconnected from ElevenLabs - Cleaning up session...");
+      isEndingRef.current = true;
       finalDurationRef.current = duration;
-      setIsConnected(false);
+      
+      await stopRecording();
+      
       setLastCallDuration(duration);
+      setIsConnected(false);
+      
       cleanupAudio();
+      
       await saveCallHistory();
+      
+      audioChunksRef.current = [];
+      
       toast({
         title: "Disconnected",
         description: "Voice chat connection ended",
@@ -235,6 +256,8 @@ export const useConversationManager = (scenario: Scenario) => {
       setLastCallDuration(null);
       setDuration(0);
       finalDurationRef.current = 0;
+      isEndingRef.current = false;
+      audioChunksRef.current = [];
       
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
@@ -275,24 +298,24 @@ export const useConversationManager = (scenario: Scenario) => {
 
   const stopConversation = async () => {
     console.log("Manually stopping conversation...");
-    if (conversationRef.current) {
+    if (conversationRef.current && !isEndingRef.current) {
       try {
+        isEndingRef.current = true;
         finalDurationRef.current = duration;
         setLastCallDuration(duration);
         
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-          mediaRecorderRef.current.stop();
-          console.log('Stopped recording audio');
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
+        await stopRecording();
         
         cleanupAudio();
+        
         await saveCallHistory();
         
         conversationRef.current.endSession();
         conversationRef.current = null;
         currentCallRef.current = null;
+        
         setIsConnected(false);
+        audioChunksRef.current = [];
       } catch (error) {
         console.error('Error during conversation stop:', error);
         toast({
