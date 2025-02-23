@@ -60,6 +60,18 @@ const dataCollectionConfig: Record<string, DataCollectionConfig> = {
           ? "Failed to question preconceptions"
           : "Not collected"
     })
+  },
+  permission: {
+    type: "boolean",
+    description: "Whether permission was obtained",
+    evaluate: (value) => ({
+      isGood: value === true,
+      description: value === true
+        ? "Permission was successfully obtained"
+        : value === false
+          ? "Failed to obtain permission"
+          : "Not collected"
+    })
   }
 };
 
