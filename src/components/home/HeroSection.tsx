@@ -2,9 +2,34 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const [session, setSession] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleStartTraining = () => {
+    if (session) {
+      navigate("/scenarios");
+    } else {
+      navigate("/auth");
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto text-center mb-16 animate-fade-up">
@@ -22,7 +47,7 @@ const HeroSection = () => {
         <Button 
           size="lg" 
           className="gap-2"
-          onClick={() => navigate("/dashboard")}
+          onClick={handleStartTraining}
         >
           Start Training Now
           <ArrowRight className="h-4 w-4" />
