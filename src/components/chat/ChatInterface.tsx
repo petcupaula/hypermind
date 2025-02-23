@@ -86,76 +86,88 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
   }, [isConnected]);
 
   return (
-    <div className="w-full max-w-3xl mx-auto bg-white/50 backdrop-blur-lg rounded-2xl border border-gray-200 shadow-lg">
-      <div className="border-b p-6">
-        <div className="flex flex-col items-center gap-6">
-          <div className="w-full flex items-center justify-center gap-6 relative">
-            {/* Current User Avatar */}
-            <div className="text-center">
-              <Avatar className="w-[100px] h-[100px] border-4 border-background mb-2">
-                <AvatarImage src={userAvatarUrl} />
-                <AvatarFallback>You</AvatarFallback>
-              </Avatar>
-              <div className="text-sm font-medium">You</div>
-              <div className="text-xs text-gray-600">User</div>
-            </div>
-
-            {/* Connection Line */}
-            <div className="flex items-center gap-2">
-              <div className={`h-[2px] w-12 transition-colors ${isConnected ? 'bg-primary' : 'bg-gray-200'}`} />
-              <div className={`p-2 rounded-full transition-colors ${isConnected ? 'bg-primary text-white' : 'bg-gray-200'}`}>
-                <Phone className="h-4 w-4" />
-              </div>
-              <div className={`h-[2px] w-12 transition-colors ${isConnected ? 'bg-primary' : 'bg-gray-200'}`} />
-            </div>
-
-            {/* Persona Avatar */}
-            <div className="text-center">
-              <div className="mb-2">
-                <PersonaAvatar 
-                  avatarUrl={scenario.persona.avatarUrl} 
-                  name={scenario.persona.name}
-                  size="large"
-                  isActive={isConnected && isSpeaking}
-                />
-              </div>
-              <div className="text-sm font-medium">{scenario.persona.name}</div>
-              <div className="text-xs text-gray-600">{scenario.persona.role}</div>
+    <div className="w-full max-w-3xl mx-auto bg-white/95 backdrop-blur-lg rounded-3xl border border-gray-100 shadow-xl">
+      <div className="p-8 space-y-8">
+        {/* Avatars and Connection */}
+        <div className="flex items-center justify-center gap-12">
+          {/* User */}
+          <div className="text-center space-y-3">
+            <Avatar className="w-24 h-24 border-4 border-white shadow-lg mx-auto">
+              <AvatarImage src={userAvatarUrl} />
+              <AvatarFallback className="text-lg">You</AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="text-lg font-semibold">You</div>
+              <div className="text-sm text-gray-500">User</div>
             </div>
           </div>
 
-          <div className="text-center w-full">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <h3 className="font-medium">{scenario.title}</h3>
-              {isConnected ? (
-                <span className="text-sm font-medium text-primary">
-                  {formatDuration(duration)}
-                </span>
-              ) : lastCallDuration ? (
-                <span className="text-sm text-gray-500">
-                  Last call: {formatDuration(lastCallDuration)}
-                </span>
-              ) : null}
+          {/* Connection Line */}
+          <div className="flex items-center gap-3 -mt-4">
+            <div className={`h-[2px] w-16 transition-colors ${isConnected ? 'bg-primary' : 'bg-gray-200'}`} />
+            <div className={`p-2.5 rounded-full transition-all transform ${
+              isConnected 
+                ? 'bg-primary text-white scale-110 shadow-lg' 
+                : 'bg-gray-100 text-gray-400'
+            }`}>
+              <Phone className="h-5 w-5" />
             </div>
-            <p className="text-sm text-gray-500 mb-4">{scenario.description}</p>
-            {scenario.persona.company && (
-              <div className="text-sm text-gray-600">
-                at {scenario.persona.company}
-              </div>
-            )}
+            <div className={`h-[2px] w-16 transition-colors ${isConnected ? 'bg-primary' : 'bg-gray-200'}`} />
+          </div>
+
+          {/* Persona */}
+          <div className="text-center space-y-3">
+            <PersonaAvatar 
+              avatarUrl={scenario.persona.avatarUrl} 
+              name={scenario.persona.name}
+              size="large"
+              isActive={isConnected && isSpeaking}
+            />
+            <div>
+              <div className="text-lg font-semibold">{scenario.persona.name}</div>
+              <div className="text-sm text-gray-500">{scenario.persona.role}</div>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <div className="p-6 flex items-center justify-center">
-        <Button
-          size="lg"
-          className={`gap-2 ${isConnected ? 'bg-red-500 hover:bg-red-600' : 'bg-primary hover:bg-primary/90'}`}
-          onClick={isConnected ? stopConversation : startConversation}
-        >
-          <Phone className={`h-5 w-5 ${isConnected && 'animate-pulse'}`} />
-          {isConnected ? 'End Call' : 'Start Call'}
-        </Button>
+
+        {/* Scenario Info */}
+        <div className="text-center space-y-3 max-w-xl mx-auto">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-semibold tracking-tight">
+              {scenario.title}
+              {(isConnected || lastCallDuration) && (
+                <span className="ml-2 text-base font-normal text-gray-500">
+                  {isConnected 
+                    ? formatDuration(duration)
+                    : `Last call: ${formatDuration(lastCallDuration)}`
+                  }
+                </span>
+              )}
+            </h2>
+            <p className="text-gray-500">{scenario.description}</p>
+          </div>
+          {scenario.persona.company && (
+            <div className="text-sm text-gray-400">
+              at {scenario.persona.company}
+            </div>
+          )}
+        </div>
+
+        {/* Call Button */}
+        <div className="flex justify-center">
+          <Button
+            size="lg"
+            className={`px-8 py-6 text-base font-medium transition-all transform hover:scale-105 ${
+              isConnected 
+                ? 'bg-red-500 hover:bg-red-600' 
+                : 'bg-primary hover:bg-primary/90'
+            }`}
+            onClick={isConnected ? stopConversation : startConversation}
+          >
+            <Phone className={`h-5 w-5 mr-2 ${isConnected && 'animate-pulse'}`} />
+            {isConnected ? 'End Call' : 'Start Call'}
+          </Button>
+        </div>
       </div>
     </div>
   );
