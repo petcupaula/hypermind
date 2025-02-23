@@ -27,6 +27,9 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
     setDuration,
   } = useConversationManager(scenario);
 
+  const user = supabase.auth.getUser();
+  const userAvatarUrl = user?.data?.user?.user_metadata?.avatar_url;
+
   useEffect(() => {
     if (isConnected) {
       timerRef.current = setInterval(() => {
@@ -83,10 +86,11 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
             {/* Current User Avatar */}
             <div className="text-center">
               <Avatar className="w-[100px] h-[100px] border-4 border-background mb-2">
-                <AvatarImage src={supabase.auth.getUser()?.data?.user?.user_metadata?.avatar_url} />
+                <AvatarImage src={userAvatarUrl} />
                 <AvatarFallback>You</AvatarFallback>
               </Avatar>
               <div className="text-sm font-medium">You</div>
+              <div className="text-xs text-gray-600">User</div>
             </div>
 
             {/* Connection Line */}
@@ -109,6 +113,7 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
                 />
               </div>
               <div className="text-sm font-medium">{scenario.persona.name}</div>
+              <div className="text-xs text-gray-600">{scenario.persona.role}</div>
             </div>
           </div>
 
@@ -126,9 +131,9 @@ const ChatInterface = ({ scenario }: ChatInterfaceProps) => {
               ) : null}
             </div>
             <p className="text-sm text-gray-500 mb-4">{scenario.description}</p>
-            {scenario.persona.role && scenario.persona.company && (
+            {scenario.persona.company && (
               <div className="text-sm text-gray-600">
-                {scenario.persona.role} at {scenario.persona.company}
+                at {scenario.persona.company}
               </div>
             )}
           </div>
