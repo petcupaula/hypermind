@@ -51,8 +51,9 @@ interface DataCollectionItem {
   data_collection_id: string;
 }
 
-type DataCollectionResults = {
+interface DataCollectionResults {
   [key: string]: DataCollectionItem;
+  prospect_questions?: string[];
 }
 
 interface EvaluationResult {
@@ -487,8 +488,8 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
             <div>
               <h3 className="font-semibold text-lg mb-3">Prospect Questions</h3>
               <div className="space-y-3">
-                {Array.isArray(call.data_collection_results.prospect_questions) ? (
-                  call.data_collection_results.prospect_questions.map((question, index) => (
+                {Array.isArray((call.data_collection_results as DataCollectionResults).prospect_questions) ? (
+                  (call.data_collection_results as DataCollectionResults).prospect_questions!.map((question, index) => (
                     <div key={index} className="flex items-start gap-3 bg-muted/50 rounded-lg p-4">
                       <MessageCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                       <div className="text-sm">{question}</div>
