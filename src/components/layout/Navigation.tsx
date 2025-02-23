@@ -51,7 +51,7 @@ const Navigation = () => {
           <Link to="/" className="text-xl font-semibold">
             hypermind
           </Link>
-          <div className="hidden md:flex items-center space-x-6 ml-8">
+          <div className="hidden sm:flex items-center space-x-6 ml-8">
             {!session ? (
               <>
                 <Link to="/features" className="text-sm text-gray-600 hover:text-gray-900">Features</Link>
