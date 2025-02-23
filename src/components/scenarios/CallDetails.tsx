@@ -312,7 +312,9 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
           {call.data_collection_results && (
             <div>
               <h3 className="font-semibold text-lg mb-3">Data Collection Results</h3>
-              <DataCollectionResults results={call.data_collection_results} />
+              <div className="space-y-3">
+                <DataCollectionResults results={call.data_collection_results} />
+              </div>
             </div>
           )}
 

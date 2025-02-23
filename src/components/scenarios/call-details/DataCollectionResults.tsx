@@ -81,6 +81,6 @@ export const DataCollectionResults = ({ results }: DataCollectionResultsProps) =
           </div>
         </div>
       </div>
-    );
+    ));
   });
 };
