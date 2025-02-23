@@ -51,8 +51,12 @@ interface DataCollectionItem {
   data_collection_id: string;
 }
 
-interface DataCollectionResults {
+interface DataCollectionMetrics {
   [key: string]: DataCollectionItem;
+}
+
+interface DataCollectionResults extends DataCollectionMetrics {
+  metrics: DataCollectionMetrics;
   prospect_questions?: string[];
 }
 
@@ -325,7 +329,8 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
     const typedResults = results as DataCollectionResults;
     if (!typedResults || typeof typedResults !== 'object') return null;
 
-    return Object.entries(typedResults).map(([key, result]) => {
+    return Object.entries(typedResults.metrics || typedResults).map(([key, result]) => {
+      if (key === 'prospect_questions') return null;
       const status = getDataCollectionResultStatus(key, result.value);
       
       return (
@@ -382,7 +387,7 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
           </div>
         </div>
       );
-    });
+    }).filter(Boolean);
   };
 
   const getDataCollectionResultStatus = (key: string, value: boolean | number | null) => {
@@ -488,18 +493,25 @@ const CallDetails = ({ id: propId }: CallDetailsProps) => {
             <div>
               <h3 className="font-semibold text-lg mb-3">Prospect Questions</h3>
               <div className="space-y-3">
-                {Array.isArray((call.data_collection_results as DataCollectionResults).prospect_questions) ? (
-                  (call.data_collection_results as DataCollectionResults).prospect_questions!.map((question, index) => (
-                    <div key={index} className="flex items-start gap-3 bg-muted/50 rounded-lg p-4">
-                      <MessageCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                      <div className="text-sm">{question}</div>
+                {(() => {
+                  const results = call.data_collection_results as unknown as DataCollectionResults;
+                  const questions = results?.prospect_questions;
+                  
+                  if (Array.isArray(questions) && questions.length > 0) {
+                    return questions.map((question, index) => (
+                      <div key={index} className="flex items-start gap-3 bg-muted/50 rounded-lg p-4">
+                        <MessageCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                        <div className="text-sm">{question}</div>
+                      </div>
+                    ));
+                  }
+                  
+                  return (
+                    <div className="text-sm text-muted-foreground">
+                      No prospect questions were detected in this conversation.
                     </div>
-                  ))
-                ) : (
-                  <div className="text-sm text-muted-foreground">
-                    No prospect questions were detected in this conversation.
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             </div>
           )}
