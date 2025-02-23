@@ -10,7 +10,6 @@ const CallHistoryPage = () => {
       <Navigation />
       <main className="container pt-32 pb-16">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl font-bold tracking-tight mb-8">Call History</h1>
           <CallHistory />
         </div>
       </main>
