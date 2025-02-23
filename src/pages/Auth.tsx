@@ -51,7 +51,7 @@ const Auth = () => {
             title: "Welcome back!",
             description: "Successfully signed in.",
           });
-          navigate("/");
+          navigate("/scenarios"); // Changed from "/" to "/scenarios"
         }
       }
     } catch (error) {
