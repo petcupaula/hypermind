@@ -1,7 +1,9 @@
 
-import type { Database } from "@/integrations/supabase/types";
+import type { Database, Json } from "@/integrations/supabase/types";
 
-export interface CallRecord extends Database["public"]["Tables"]["call_history"]["Row"] {
+type CallHistoryRow = Database["public"]["Tables"]["call_history"]["Row"];
+
+export interface CallRecord extends CallHistoryRow {
   scenarios: {
     title: string;
     description: string;
